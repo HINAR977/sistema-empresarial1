@@ -5,25 +5,49 @@ import { logout } from "./auth.js";
 // Elementos
 const dashboard = document.getElementById("dashboard");
 const loginSection = document.getElementById("loginSection");
+const loginForm = document.getElementById("loginForm");
 const tablaUsuarios = document.querySelector("#tablaUsuarios tbody");
 
-let usuarios = [];
+// ============================
+//   USUARIOS DE PRUEBA
+// ============================
+let usuarios = [
+    { id: 0, name: "Admin Master", email: "admin@empresa.com", password: "Admin1234" },
+    { id: 1, name: "John Doe", email: "john@example.com", password: "12345678" },
+    { id: 2, name: "Jane Smith", email: "jane@example.com", password: "12345678" },
+    { id: 3, name: "Michael Brown", email: "michael@example.com", password: "12345678" },
+    { id: 4, name: "Emily Davis", email: "emily@example.com", password: "12345678" },
+    { id: 5, name: "William Johnson", email: "william@example.com", password: "12345678" }
+];
+
 let editando = null;
 
 // ============================
 //   INICIO DEL SISTEMA
 // ============================
-document.addEventListener("DOMContentLoaded", async () => {
+document.addEventListener("DOMContentLoaded", () => {
+    // Si ya hay token, mostrar dashboard
     const token = getToken();
-
     if (!token) return mostrarLogin();
-
-    const profile = await apiAuthRequest("/users/profile", "GET", token);
-
-    if (profile.error) return mostrarLogin();
-
     mostrarDashboard();
-    cargarUsuarios();
+});
+
+// ============================
+//   LOGIN LOCAL
+// ============================
+loginForm.addEventListener("submit", function (e) {
+    e.preventDefault();
+
+    const email = document.getElementById("email").value;
+    const password = document.getElementById("password").value;
+
+    const usuario = usuarios.find(u => u.email === email && u.password === password);
+
+    if (usuario) {
+        mostrarDashboard(usuario);
+    } else {
+        alert("Usuario o contraseña incorrectos");
+    }
 });
 
 // ============================
@@ -34,29 +58,29 @@ function mostrarLogin() {
     dashboard.style.display = "none";
 }
 
-function mostrarDashboard() {
+function mostrarDashboard(usuario = null) {
     loginSection.style.display = "none";
     dashboard.style.display = "flex";
-}
 
-window.logout = logout;
+    if (usuario) {
+        document.getElementById("userNameDisplay").textContent = usuario.name;
+    }
 
-// ============================
-//   CARGAR USUARIOS
-// ============================
-async function cargarUsuarios() {
-    const token = getToken();
-    const res = await apiAuthRequest("/users", "GET", token);
-    usuarios = res.data || [];
     renderUsuarios();
 }
 
+window.logout = () => {
+    mostrarLogin();
+};
+
+// ============================
+//   RENDERIZAR USUARIOS
+// ============================
 function renderUsuarios() {
     tablaUsuarios.innerHTML = "";
 
     usuarios.forEach(u => {
         const tr = document.createElement("tr");
-
         tr.innerHTML = `
             <td>${u.id}</td>
             <td>${u.name}</td>
@@ -66,7 +90,6 @@ function renderUsuarios() {
                 <button class="delete-btn" onclick="eliminarUsuario(${u.id})">Eliminar</button>
             </td>
         `;
-
         tablaUsuarios.appendChild(tr);
     });
 }
@@ -86,45 +109,45 @@ window.closeFormUsuario = function () {
 };
 
 // ============================
-//   GUARDAR USUARIO (CREATE / UPDATE)
+//   GUARDAR USUARIO
 // ============================
-window.guardarUsuario = async function () {
+window.guardarUsuario = function () {
     const nombre = document.getElementById("nombreUsuario").value;
     const email = document.getElementById("emailUsuario").value;
     const password = document.getElementById("passwordUsuario").value;
-    const token = getToken();
 
     if (!nombre || !email) return alert("Faltan datos");
 
-    let body = { name: nombre, email };
-    if (password) body.password = password;
-
     if (!editando) {
         // CREATE
-        const res = await apiAuthRequest("/users", "POST", token, body);
-        if (!res.error) {
-            cargarUsuarios();
-            closeFormUsuario();
-        }
+        const nuevoUsuario = {
+            id: usuarios.length ? usuarios[usuarios.length - 1].id + 1 : 1,
+            name: nombre,
+            email,
+            password: password || "12345678"
+        };
+        usuarios.push(nuevoUsuario);
     } else {
         // UPDATE
-        const res = await apiAuthRequest(`/users/${editando}`, "PUT", token, body);
-        if (!res.error) {
-            cargarUsuarios();
-            closeFormUsuario();
-        }
+        const u = usuarios.find(x => x.id === editando);
+        if (!u) return;
+        u.name = nombre;
+        u.email = email;
+        if(password) u.password = password;
     }
+
+    renderUsuarios();
+    closeFormUsuario();
 };
 
 // ============================
-//   EDITAR
+//   EDITAR USUARIO
 // ============================
 window.editarUsuario = function (id) {
     const u = usuarios.find(x => x.id === id);
     if (!u) return;
 
     editando = id;
-
     document.getElementById("tituloFormUsuario").textContent = "Editar Usuario";
     document.getElementById("nombreUsuario").value = u.name;
     document.getElementById("emailUsuario").value = u.email;
@@ -134,13 +157,26 @@ window.editarUsuario = function (id) {
 };
 
 // ============================
-//   ELIMINAR
+//   ELIMINAR USUARIO
 // ============================
-window.eliminarUsuario = async function (id) {
+window.eliminarUsuario = function (id) {
     if (!confirm("¿Eliminar este usuario?")) return;
-
-    const token = getToken();
-    const res = await apiAuthRequest(`/users/${id}`, "DELETE", token);
-
-    if (!res.error) cargarUsuarios();
+    usuarios = usuarios.filter(u => u.id !== id);
+    renderUsuarios();
 };
+
+// ============================
+//   TOGGLE PASSWORD
+// ============================
+function setupPasswordToggle(toggleId, inputId){
+    const toggle = document.getElementById(toggleId);
+    const input = document.getElementById(inputId);
+    if(toggle && input){
+        toggle.addEventListener("click", ()=>{
+            input.type = input.type==="password"?"text":"password";
+            toggle.classList.toggle("fa-eye-slash");
+        });
+    }
+}
+setupPasswordToggle("togglePassLogin","password");
+setupPasswordToggle("togglePassModal","passwordUsuario");
