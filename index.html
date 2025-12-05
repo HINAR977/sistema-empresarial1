@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sistema Empresarial - Dashboard</title>
+<!-- FontAwesome para iconos -->
+<script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+<style>
+/* -------------------- RESET -------------------- */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* -------------------- BODY -------------------- */
+body {
+    background: linear-gradient(135deg, #1E3C72, #2A5298);
+    color: #333;
+    min-height: 100vh;
+}
+
+/* -------------------- LOGIN -------------------- */
+.login-body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+}
+
+.login-container {
+    background-color: #fff;
+    padding: 50px 40px;
+    border-radius: 15px;
+    box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+    text-align: center;
+    width: 380px;
+    transition: transform 0.3s;
+}
+
+.login-container:hover {
+    transform: translateY(-5px);
+}
+
+.login-logo {
+    width: 120px;
+    margin-bottom: 25px;
+}
+
+.login-container h2 {
+    margin-bottom: 25px;
+    color: #1E3C72;
+    font-weight: 600;
+}
+
+.login-container input {
+    width: 100%;
+    padding: 14px 40px 14px 14px;
+    margin: 12px 0;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    font-size: 16px;
+    position: relative;
+}
+
+.login-container .input-wrapper {
+    position: relative;
+}
+
+.login-container .input-wrapper i {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    color: #888;
+}
+
+.login-container button {
+    width: 100%;
+    padding: 14px;
+    background-color: #1E3C72;
+    border: none;
+    color: #fff;
+    font-size: 18px;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+.login-container button:hover {
+    background-color: #16325c;
+}
+
+/* -------------------- DASHBOARD -------------------- */
+#dashboard {
+    display: flex;
+    min-height: 100vh;
+}
+
+/* Sidebar */
+.sidebar {
+    width: 250px;
+    background-color: #1E3C72;
+    color: #fff;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    padding-top: 20px;
+}
+
+.sidebar h2 {
+    text-align: center;
+    margin-bottom: 30px;
+    font-size: 24px;
+    font-weight: 600;
+}
+
+.sidebar a {
+    color: #fff;
+    text-decoration: none;
+    padding: 15px 25px;
+    display: block;
+    transition: background 0.3s;
+    border-left: 5px solid transparent;
+    font-weight: 500;
+}
+
+.sidebar a:hover {
+    background-color: #16325c;
+    border-left: 5px solid #28a745;
+}
+
+/* Topbar */
+.topbar {
+    background-color: #fff;
+    padding: 15px 25px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-radius: 0 0 15px 15px;
+}
+
+/* Content area */
+.content-area {
+    flex: 1;
+    padding: 30px;
+    background-color: #f4f4f9;
+}
+
+/* Table */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+}
+
+table th, table td {
+    padding: 14px;
+    text-align: left;
+}
+
+table th {
+    background-color: #1E3C72;
+    color: #fff;
+}
+
+table tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+/* Buttons */
+.btn-primary {
+    padding: 10px 18px;
+    background-color: #28a745;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+.btn-primary:hover { background-color: #218838; }
+
+button.edit-btn {
+    background-color: #ffc107;
+    color: #fff;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    margin-right: 5px;
+}
+
+button.edit-btn:hover { background-color: #e0a800; }
+
+button.delete-btn {
+    background-color: #dc3545;
+    color: #fff;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+button.delete-btn:hover { background-color: #c82333; }
+
+/* Modal */
+.modal {
+    position: fixed;
+    top: 0; left: 0; right:0; bottom:0;
+    background: rgba(0,0,0,0.6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 100;
+}
+
+.modal-content {
+    background: #fff;
+    padding: 30px;
+    border-radius: 15px;
+    width: 450px;
+    position: relative;
+    box-shadow: 0 15px 40px rgba(0,0,0,0.2);
+}
+
+.modal-content h2 {
+    margin-bottom: 20px;
+    color: #1E3C72;
+}
+
+.modal-content input {
+    width: 100%;
+    padding: 12px 40px 12px 12px;
+    margin: 10px 0;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+}
+
+.modal-content .input-wrapper {
+    position: relative;
+}
+
+.modal-content .input-wrapper i {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    color: #888;
+}
+
+.form-buttons {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.form-buttons button {
+    padding: 10px 15px;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+}
+
+.form-buttons .btn-cancelar {
+    background-color: #dc3545;
+    color: #fff;
+}
+
+.form-buttons .btn-cancelar:hover {
+    background-color: #c82333;
+}
+
+.form-buttons .btn-save {
+    background-color: #1E3C72;
+    color: #fff;
+}
+
+.form-buttons .btn-save:hover { background-color: #16325c; }
+
+/* Responsive */
+@media(max-width: 768px) {
+    #dashboard { flex-direction: column; }
+    .sidebar {
+        width: 100%;
+        flex-direction: row;
+        overflow-x: auto;
+    }
+    .sidebar a { flex: 1; text-align: center; border-left: none; }
+}
+</style>
+</head>
+<body class="login-body">
+
+<!-- LOGIN -->
+<div class="login-container" id="loginContainer">
+    <img src="assets/logo.png" class="login-logo" alt="Logo">
+    <h2>Iniciar Sesión</h2>
+
+    <form id="loginForm">
+        <input id="user" type="text" placeholder="Usuario" required>
+        <div class="input-wrapper">
+            <input id="pass" type="password" placeholder="Contraseña" required>
+            <i class="fas fa-eye" id="togglePass"></i>
+        </div>
+        <button type="submit">Ingresar</button>
+    </form>
+</div>
+
+<!-- DASHBOARD -->
+<div id="dashboard" style="display:none;">
+    <div class="sidebar">
+        <h2>Empresa</h2>
+        <a href="#" onclick="mostrarSeccion('usuarios')">Usuarios</a>
+        <a href="#" onclick="logout()">Cerrar Sesión</a>
+    </div>
+    <div class="content-area">
+        <div class="topbar">
+            <h1 id="tituloSeccion">Usuarios</h1>
+        </div>
+        <div id="usuarios">
+            <button class="btn-primary" onclick="openFormUsuario()">Agregar Usuario</button>
+            <table id="tablaUsuarios">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Usuario</th>
+                        <th>Contraseña</th>
+                        <th>Área</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+
+        <!-- Modal -->
+        <div id="modalUsuario" class="modal" style="display:none;">
+            <div class="modal-content">
+                <h2 id="tituloFormUsuario">Nuevo Usuario</h2>
+                <form id="formUsuario">
+                    <input type="text" id="usuario" placeholder="Usuario" required>
+                    <div class="input-wrapper">
+                        <input type="password" id="contrasena" placeholder="Contraseña" required>
+                        <i class="fas fa-eye" id="toggleContrasena"></i>
+                    </div>
+                    <input type="text" id="area" placeholder="Área" required>
+                    <div class="form-buttons">
+                        <button type="button" class="btn-save" onclick="guardarUsuario()">Guardar</button>
+                        <button type="button" class="btn-cancelar" onclick="closeFormUsuario()">Cancelar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// -------------------- LOGIN --------------------
+document.getElementById('loginForm').addEventListener('submit', function(e){
+    e.preventDefault();
+    login();
+});
+
+function login() {
+    const user = document.getElementById("user").value.trim();
+    const pass = document.getElementById("pass").value.trim();
+    let destino = "";
+
+    if (user === "bodegaUser" && pass === "bodega123") destino = "bodega.html";
+    if (user === "adminUser" && pass === "admin123") destino = "administracion.html";
+    if (user === "contaUser" && pass === "conta123") destino = "contabilidad.html";
+    if (user === "ventasUser" && pass === "ventas123") destino = "ventas.html";
+
+    if (destino === "") {
+        alert("Usuario o contraseña incorrectos");
+        return;
+    }
+
+    window.location.href = destino;
+}
+
+// -------------------- MOSTRAR/OCULTAR CONTRASEÑA --------------------
+const togglePass = document.getElementById('togglePass');
+const passInput = document.getElementById('pass');
+togglePass.addEventListener('click', () => {
+    passInput.type = passInput.type === "password" ? "text" : "password";
+    togglePass.classList.toggle('fa-eye-slash');
+});
+
+const toggleContrasena = document.getElementById('toggleContrasena');
+const contrasenaInput = document.getElementById('contrasena');
+toggleContrasena.addEventListener('click', () => {
+    contrasenaInput.type = contrasenaInput.type === "password" ? "text" : "password";
+    toggleContrasena.classList.toggle('fa-eye-slash');
+});
+
+// -------------------- DASHBOARD --------------------
+function logout() {
+    document.getElementById('dashboard').style.display = 'none';
+    document.getElementById('loginContainer').style.display = 'flex';
+}
+function mostrarSeccion(seccion) {
+    document.getElementById('tituloSeccion').textContent = seccion.charAt(0).toUpperCase() + seccion.slice(1);
+}
+function openFormUsuario() { document.getElementById('modalUsuario').style.display='flex'; }
+function closeFormUsuario() { 
+    document.getElementById('modalUsuario').style.display='none'; 
+    document.getElementById('formUsuario').reset();
+    document.getElementById('tituloFormUsuario').textContent = "Nuevo Usuario";
+    document.querySelector('.btn-save').onclick = guardarUsuario;
+}
+
+// -------------------- USUARIOS --------------------
+let usuarios = [];
+let nextId = 1;
+
+function guardarUsuario() {
+    const usuario = document.getElementById('usuario').value.trim();
+    const contrasena = document.getElementById('contrasena').value.trim();
+    const area = document.getElementById('area').value.trim();
+    if(usuario && contrasena && area){
+        usuarios.push({id: nextId++, usuario, contrasena, area});
+        actualizarTabla();
+        closeFormUsuario();
+    } else { alert("Todos los campos son obligatorios"); }
+}
+
+function actualizarTabla() {
+    const tbody = document.querySelector('#tablaUsuarios tbody');
+    tbody.innerHTML = '';
+    usuarios.forEach(u => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td>${u.id}</td>
+            <td>${u.usuario}</td>
+            <td>${u.contrasena}</td>
+            <td>${u.area}</td>
+            <td>
+                <button class="edit-btn" onclick="editarUsuario(${u.id})">Editar</button>
+                <button class="delete-btn" onclick="eliminarUsuario(${u.id})">Eliminar</button>
+            </td>`;
+        tbody.appendChild(tr);
+    });
+}
+
+function eliminarUsuario(id){
+    usuarios = usuarios.filter(u => u.id !== id);
+    actualizarTabla();
+}
+
+function editarUsuario(id){
+    const u = usuarios.find(u => u.id===id);
+    if(u){
+        openFormUsuario();
+        document.getElementById('tituloFormUsuario').textContent = "Editar Usuario";
+        document.getElementById('usuario').value = u.usuario;
+        document.getElementById('contrasena').value = u.contrasena;
+        document.getElementById('area').value = u.area;
+        document.querySelector('.btn-save').onclick = function(){
+            u.usuario = document.getElementById('usuario').value.trim();
+            u.contrasena = document.getElementById('contrasena').value.trim();
+            u.area = document.getElementById('area').value.trim();
+            actualizarTabla();
+            closeFormUsuario();
+        }
+    }
+}
+</script>
+</body>
+</html>

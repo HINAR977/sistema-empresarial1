@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Contabilidad</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<header class="topbar">
+    <img src="assets/logo.png" class="topbar-logo">
+    <span>Módulo Contabilidad</span>
+</header>
+
+<aside class="sidebar">
+    <h3>Contabilidad</h3>
+    <a href="dashboard.html">Inicio</a>
+    <a href="index.html">Salir</a>
+</aside>
+
+<main class="content">
+    <h1>Registros Contables</h1>
+    <button class="btn-primary" onclick="openFormCuenta()">Agregar Registro</button>
+
+    <table id="tablaContabilidad">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Cuenta</th>
+                <th>Monto</th>
+                <th>Tipo</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+
+    <div id="modalContabilidad" class="modal">
+        <div class="modal-content">
+            <h2 id="tituloFormContabilidad">Nuevo Registro</h2>
+            <input type="text" id="cuenta" placeholder="Cuenta">
+            <input type="number" id="monto" placeholder="Monto">
+            <input type="text" id="tipo" placeholder="Tipo (Ingreso/Gasto)">
+            <button onclick="guardarCuenta()">Guardar</button>
+            <button class="btn-cancelar" onclick="closeFormCuenta()">Cancelar</button>
+        </div>
+    </div>
+</main>
+
+<script src="crud_contabilidad.js"></script>
+</body>
+</html>
