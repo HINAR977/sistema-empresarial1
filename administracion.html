@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Administración</title>
+<title>Administración de Usuarios</title>
 <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -21,7 +21,7 @@
 
 <main class="content">
     <h1>Usuarios</h1>
-    <button class="btn-primary" onclick="openFormUsuario()">Agregar Usuario</button>
+    <button class="btn-primary admin-only" onclick="openFormUsuario()">Agregar Usuario</button>
 
     <table id="tablaUsuarios">
         <thead>
@@ -30,20 +30,34 @@
                 <th>Usuario</th>
                 <th>Contraseña</th>
                 <th>Área</th>
+                <th>Privilegios</th>
                 <th>Acciones</th>
             </tr>
         </thead>
         <tbody></tbody>
     </table>
 
+    <!-- MODAL -->
     <div id="modalUsuario" class="modal">
         <div class="modal-content">
             <h2 id="tituloFormUsuario">Nuevo Usuario</h2>
-            <input type="text" id="usuario" placeholder="Usuario">
-            <input type="text" id="contrasena" placeholder="Contraseña">
-            <input type="text" id="area" placeholder="Área">
-            <button onclick="guardarUsuario()">Guardar</button>
-            <button class="btn-cancelar" onclick="closeFormUsuario()">Cancelar</button>
+            <div id="mensajeExito">Usuario guardado con éxito!</div>
+            <form id="formUsuario">
+                <input type="text" id="usuario" placeholder="Usuario" required>
+                <input type="password" id="contrasena" placeholder="Contraseña" required>
+                <input type="text" id="area" placeholder="Área" required>
+                <select id="privilegios" required>
+                    <option value="">Seleccione privilegio</option>
+                    <option value="adminUser">Administrador</option>
+                    <option value="bodegaUser">Bodega</option>
+                    <option value="contaUser">Contabilidad</option>
+                    <option value="ventasUser">Ventas</option>
+                </select>
+                <div class="form-buttons">
+                    <button type="button" class="btn-primary" onclick="guardarUsuario()">Guardar</button>
+                    <button type="button" class="btn-cancelar" onclick="closeFormUsuario()">Cancelar</button>
+                </div>
+            </form>
         </div>
     </div>
 </main>

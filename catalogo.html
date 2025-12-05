@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Catálogo - Tienda Virtual</title>
+<link rel="stylesheet" href="styles.css">
+<style>
+    body { font-family: Arial, sans-serif; margin: 0; padding: 0; }
+    header { background-color: #333; color: white; padding: 1rem; text-align: center; }
+    #filtros { display: flex; gap: 1rem; padding: 1rem; }
+    #productos-container { display: flex; flex-wrap: wrap; gap: 1rem; padding: 1rem; }
+    .producto { border: 1px solid #ccc; padding: 1rem; width: 200px; }
+    #carrito { border-top: 2px solid #333; padding: 1rem; }
+    #carrito-lista li { margin-bottom: 0.5rem; }
+</style>
+</head>
+<body>
+
+<header>
+    <h1>Tienda Virtual - Catálogo</h1>
+</header>
+
+<section id="filtros">
+    <label>Talla:
+        <select id="filtro-talla">
+            <option value="">Todas</option>
+            <option value="XS">XS</option>
+            <option value="S">S</option>
+            <option value="M">M</option>
+            <option value="L">L</option>
+            <option value="XL">XL</option>
+        </select>
+    </label>
+
+    <label>Color:
+        <select id="filtro-color">
+            <option value="">Todos</option>
+            <option value="Azul">Azul</option>
+            <option value="Rojo">Rojo</option>
+            <option value="Negro">Negro</option>
+        </select>
+    </label>
+
+    <button onclick="aplicarFiltros()">Filtrar</button>
+</section>
+
+<section id="productos-container">
+    <!-- Productos se mostrarán aquí -->
+</section>
+
+<section id="carrito">
+    <h2>Carrito de Compras</h2>
+    <ul id="carrito-lista"></ul>
+    <p>Total: $<span id="total-carrito">0</span></p>
+</section>
+
+<script>
+    // Productos de ejemplo
+    let productos = [
+        { id: 1, nombre: "Camiseta Azul", precio: 25, talla: "M", color: "Azul" },
+        { id: 2, nombre: "Pantalón Rojo", precio: 40, talla: "L", color: "Rojo" },
+        { id: 3, nombre: "Chaqueta Negra", precio: 60, talla: "XL", color: "Negro" },
+        { id: 4, nombre: "Camiseta Roja", precio: 25, talla: "S", color: "Rojo" },
+        { id: 5, nombre: "Pantalón Negro", precio: 45, talla: "M", color: "Negro" },
+    ];
+
+    // Inicializar carrito desde localStorage
+    let carrito = JSON.parse(localStorage.getItem('carrito')) || [];
+
+    function guardarCarrito() {
+        localStorage.setItem('carrito', JSON.stringify(carrito));
+    }
+
+    function actualizarCarrito() {
+        const lista = document.getElementById("carrito-lista");
+        lista.innerHTML = "";
+        let total = 0;
+
+        carrito.forEach(item => {
+            total += item.precio * item.cantidad;
+            const li = document.createElement("li");
+            li.textContent = `${item.nombre} - $${item.precio} x ${item.cantidad} = $${item.precio * item.cantidad}`;
+            
+            const btnEliminar = document.createElement("button");
+            btnEliminar.textContent = "Eliminar";
+            btnEliminar.onclick = () => eliminarDelCarrito(item.id);
+            li.appendChild(btnEliminar);
+            lista.appendChild(li);
+        });
+
+        document.getElementById("total-carrito").textContent = total;
+    }
+
+    function agregarAlCarrito(id) {
+        const producto = productos.find(p => p.id === id);
+        const itemCarrito = carrito.find(item => item.id === id);
+
+        if (itemCarrito) {
+            itemCarrito.cantidad++;
+        } else {
+            carrito.push({ ...producto, cantidad: 1 });
+        }
+
+        actualizarCarrito();
+        guardarCarrito();
+    }
+
+    function eliminarDelCarrito(id) {
+        const index = carrito.findIndex(item => item.id === id);
+        if (index > -1) {
+            if (carrito[index].cantidad > 1) {
+                carrito[index].cantidad--;
+            } else {
+                carrito.splice(index, 1);
+            }
+            actualizarCarrito();
+            guardarCarrito();
+        }
+    }
+
+    function mostrarProductos(listaProductos = productos) {
+        const container = document.getElementById("productos-container");
+        container.innerHTML = "";
+        listaProductos.forEach(prod => {
+            const div = document.createElement("div");
+            div.classList.add("producto");
+            div.innerHTML = `
+                <h3>${prod.nombre}</h3>
+                <p>Precio: $${prod.precio}</p>
+                <p>Talla: ${prod.talla}</p>
+                <p>Color: ${prod.color}</p>
+                <button onclick="agregarAlCarrito(${prod.id})">Agregar al carrito</button>
+            `;
+            container.appendChild(div);
+        });
+    }
+
+    function aplicarFiltros() {
+        const talla = document.getElementById('filtro-talla').value;
+        const color = document.getElementById('filtro-color').value;
+
+        let filtrados = productos;
+
+        if (talla) filtrados = filtrados.filter(p => p.talla === talla);
+        if (color) filtrados = filtrados.filter(p => p.color === color);
+
+        mostrarProductos(filtrados);
+    }
+
+    // Inicializar vista
+    mostrarProductos();
+    actualizarCarrito();
+</script>
+
+</body>
+</html>
