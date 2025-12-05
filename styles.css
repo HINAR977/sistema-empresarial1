@@ -1,81 +1,306 @@
+/* ======================================================
+   1. VARIABLES GLOBALES Y RESET 
+   ====================================================== */
 :root {
-    --azul-primario: #1F4E79;
-    --azul-secundario: #3A6DA1;
-    --gris-oscuro: #2B2B2B;
-    --gris-claro: #E6E6E6;
+    /* Paleta de colores proporcionada */
+    --azul-primario: #1F4E79; /* Azul Corporativo principal */
+    --azul-secundario: #3A6DA1; /* Azul para highlights */
+    --gris-oscuro: #2B2B2B; /* Fondo de Sidebar */
+    --gris-claro: #E6E6E6; /* Fondo principal (Body) */
     --blanco: #FFFFFF;
     --verde-ok: #4CAF50;
     --rojo-alerta: #D9534F;
+
+    /* Nuevas variables para consistencia visual */
+    --shadow-base: 0 2px 4px rgba(0, 0, 0, 0.1);
+    --padding-base: 15px;
+    --sidebar-width: 230px;
+    --topbar-height: 60px;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
 }
 
 body {
-    margin: 0;
     font-family: 'Segoe UI', Arial, sans-serif;
     background: var(--gris-claro);
+    color: var(--gris-oscuro);
 }
 
-.topbar {
+a {
+    text-decoration: none;
+    transition: color 0.2s;
+}
+
+/* ======================================================
+   2. SECCIÓN DE AUTENTICACIÓN (LOGIN) - Centrada
+   ====================================================== */
+
+/* Mantenemos el centrado del login */
+.auth-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    /* Usamos un degradado sutil con el color primario */
+    background: linear-gradient(135deg, var(--azul-secundario) 0%, var(--azul-primario) 100%); 
+}
+
+.auth-container {
+    background: var(--blanco);
+    padding: 40px;
+    border-radius: 10px;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3); /* Sombra fuerte para destacar */
     width: 100%;
-    height: 60px;
+    max-width: 400px;
+    text-align: center;
+}
+
+.auth-logo {
+    width: 100px;
+    margin-bottom: 25px;
+}
+
+.auth-title {
+    color: var(--azul-primario);
+    margin-bottom: 30px;
+    font-weight: 600;
+    font-size: 24px;
+}
+
+/* --- Input Groups (Estilo Empresarial con Iconos) --- */
+.input-group {
+    position: relative;
+    margin-bottom: var(--padding-base);
+}
+
+.input-group input {
+    width: 100%;
+    padding: 10px 10px 10px 40px; /* Ajuste para icono a la izquierda */
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    font-size: 16px;
+    transition: border-color 0.3s;
+}
+
+.input-group input:focus {
+    border-color: var(--azul-secundario);
+    outline: none;
+    box-shadow: 0 0 0 0.1rem rgba(58, 109, 161, 0.25);
+}
+
+.input-icon {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--azul-secundario);
+    font-size: 14px;
+}
+
+.password-toggle {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--azul-secundario);
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.btn-submit {
+    width: 100%;
+    background-color: var(--azul-primario);
+    color: var(--blanco);
+    border: none;
+    padding: 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 17px;
+    margin-top: 20px;
+    font-weight: 600;
+    transition: background-color 0.3s;
+}
+
+.btn-submit:hover {
+    background-color: var(--azul-secundario);
+}
+
+.auth-footer {
+    margin-top: 20px;
+}
+
+.auth-footer a {
+    color: var(--azul-secundario);
+}
+
+/* ======================================================
+   3. DASHBOARD LAYOUT (Estructura Sidebar/TopBar)
+   ====================================================== */
+
+/* --- Topbar --- */
+.topbar {
+    position: fixed; /* Asegura que la barra superior esté siempre arriba */
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: var(--topbar-height);
     background: var(--azul-primario);
-    color: white;
+    color: var(--blanco);
+    display: flex;
+    justify-content: space-between; /* Permite colocar el perfil a la derecha */
+    align-items: center;
+    padding: 0 20px;
+    box-shadow: var(--shadow-base);
+    z-index: 100;
+}
+
+.topbar-logo { 
+    width: 40px; 
+    margin-right: 10px; 
+}
+
+/* Título de sección dentro del topbar, si lo deseas ahí */
+.page-title {
+    font-size: 20px;
+    font-weight: 400;
+}
+
+.user-profile {
     display: flex;
     align-items: center;
-    padding-left: 20px;
+    cursor: pointer;
 }
 
-.topbar-logo { width: 40px; margin-right: 10px; }
+.user-profile span {
+    margin-right: 10px;
+    font-size: 15px;
+}
 
+.profile-icon {
+    font-size: 24px;
+    color: var(--blanco);
+}
+
+/* --- Sidebar --- */
 .sidebar {
     position: fixed;
-    top: 60px;
+    top: var(--topbar-height); /* Comienza justo debajo del Topbar */
     left: 0;
-    width: 230px;
-    height: 100%;
+    width: var(--sidebar-width);
+    height: calc(100% - var(--topbar-height));
     background: var(--gris-oscuro);
-    color: white;
+    color: var(--blanco);
+    padding: 20px 0;
+    overflow-y: auto; /* Para scroll si hay muchos ítems */
+    z-index: 99;
+}
+
+.sidebar-nav {
+    display: flex;
+    flex-direction: column;
+    padding: 10px 0;
+}
+
+.sidebar-nav a {
+    display: flex;
+    align-items: center;
+    padding: 12px 20px;
+    color: var(--blanco);
+    text-decoration: none;
+    transition: background-color 0.2s, color 0.2s;
+}
+
+.sidebar-nav a i {
+    margin-right: 10px;
+}
+
+.sidebar-nav a:hover,
+.sidebar-nav a.active {
+    background: var(--azul-secundario);
+    color: var(--blanco);
+}
+
+/* --- Contenido Principal --- */
+.main-content {
+    /* El contenido debe dejar espacio para la barra fija */
+    margin-left: var(--sidebar-width);
+    padding-top: var(--topbar-height); /* Deja espacio para el Topbar */
+    min-height: 100vh;
+}
+
+.content-area-sections {
     padding: 20px;
 }
 
-.sidebar a {
-    display: block;
-    margin: 15px 0;
-    text-decoration: none;
-    color: white;
+.content-section {
+    background: var(--blanco);
+    padding: 20px;
+    border-radius: 6px;
+    box-shadow: var(--shadow-base);
+    margin-bottom: 20px;
 }
 
-.sidebar a:hover { color: var(--azul-secundario); }
-
-.content { margin-left: 260px; padding: 20px; }
+/* ======================================================
+   4. ESTILOS DE TABLA Y BOTONES (Según tu estructura)
+   ====================================================== */
 
 table {
     width: 100%;
     border-collapse: collapse;
-    background: white;
+    background: var(--blanco);
     margin-top: 20px;
+    box-shadow: var(--shadow-base);
+    border-radius: 6px;
+    overflow: hidden; /* Para que los bordes redondeados se apliquen al encabezado */
 }
 
-th, td { padding: 12px; border-bottom: 1px solid #ddd; }
+th, td { 
+    padding: 12px; 
+    border-bottom: 1px solid var(--gris-claro); 
+}
 
-th { background: var(--azul-primario); color: white; }
+th { 
+    background: var(--azul-primario); 
+    color: var(--blanco);
+    font-weight: 600;
+}
 
-.btn-primary {
+.btn-primary, .btn-save {
     background: var(--azul-primario);
-    color: white;
-    padding: 10px 20px;
+    color: var(--blanco);
+    padding: 10px 15px;
     border: none;
     border-radius: 6px;
     cursor: pointer;
+    font-weight: 600;
+    transition: background-color 0.2s;
+    display: inline-flex;
+    align-items: center;
 }
 
-.btn-delete {
+.btn-primary i, .btn-save i { margin-right: 5px; }
+
+.btn-primary:hover, .btn-save:hover { background: var(--azul-secundario); }
+
+.btn-delete, .btn-cancelar {
     background: var(--rojo-alerta);
-    color: white;
+    color: var(--blanco);
     padding: 6px 12px;
     border: none;
     border-radius: 4px;
     cursor: pointer;
+    transition: opacity 0.2s;
 }
+
+.btn-delete:hover, .btn-cancelar:hover { opacity: 0.85; }
+
+/* ======================================================
+   5. ESTILOS DEL MODAL
+   ====================================================== */
 
 .modal {
     display: none;
@@ -85,47 +310,64 @@ th { background: var(--azul-primario); color: white; }
     background: rgba(0,0,0,0.5);
     justify-content: center;
     align-items: center;
+    z-index: 1000;
 }
 
 .modal-content {
-    background: white;
-    width: 350px;
+    background: var(--blanco);
+    width: 90%;
+    max-width: 450px;
     padding: 30px;
     border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
 }
 
-.modal-content input,
-.modal-content select {
-    width: 100%;
-    padding: 12px;
-    margin-top: 12px;
-    border-radius: 6px;
-    border: 1px solid #ccc;
+.modal-content input {
+    margin-top: 0; /* Lo removemos ya que usamos .input-group */
 }
 
-.btn-cancelar {
-    background: gray;
-    color: white;
-    padding: 10px;
-    border: none;
-    border-radius: 6px;
-    margin-top: 10px;
-    cursor: pointer;
+.modal-title {
+    color: var(--azul-primario);
+    margin-bottom: 20px;
 }
 
-#mensajeExito {
-    color: var(--verde-ok);
-    margin-bottom: 10px;
-    display: none;
+.form-buttons {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 20px;
 }
 
-/* ADMIN ONLY */
-.admin-only { display: none; }
+/* ======================================================
+   6. RESPONSIVE Y OTROS
+   ====================================================== */
 
-/* Responsive */
 @media screen and (max-width: 768px) {
-    .sidebar { display: none; }
-    .content { margin-left: 0; }
-    table, thead, tbody, th, td, tr { display: block; width: 100%; }
-    tr { margin-bottom: 15px; }
+    .sidebar { 
+        display: none; 
+        /* Si implementas un menú de hamburguesa, deberías cambiar esto */
+    }
+    .main-content { 
+        margin-left: 0; 
+        padding-top: var(--topbar-height);
+    }
+    
+    /* Adaptación de la tabla (como estaba en tu código original) */
+    .data-table, .data-table thead, .data-table tbody, .data-table th, .data-table td, .data-table tr { 
+        display: block; 
+        width: 100%; 
+    }
+    .data-table thead tr {
+        position: absolute;
+        top: -9999px;
+        left: -9999px;
+    }
+    .data-table tr { margin-bottom: 15px; border: 1px solid #ccc; border-radius: 5px; }
+    .data-table td { 
+        border: none; 
+        position: relative;
+        padding-left: 50%; 
+        text-align: right;
+    }
+    /* El resto de las reglas de tabla responsive... */
 }
