@@ -31,7 +31,6 @@ function openFormUsuario() {
     document.getElementById('privilegios').value = '';
 }
 
-
 function closeFormUsuario() { document.getElementById('modalUsuario').style.display = 'none'; }
 
 function mostrarMensajeExito() {
