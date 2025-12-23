@@ -4,34 +4,27 @@
 const jwt = require('jsonwebtoken');
 const UserModel = require('../models/userModel');
 const { errorResponse } = require('../utils/helpers');
+require('dotenv').config();
 
 /**
  * Verificar token JWT
  */
 const verifyToken = async (req, res, next) => {
     try {
-        // Obtener token del header
         const authHeader = req.headers.authorization;
-        
+
         if (!authHeader || !authHeader.startsWith('Bearer ')) {
             return errorResponse(res, 401, 'Token de acceso no proporcionado');
         }
 
-        const token = authHeader.split(' '),[object Object],;
-
-        // Verificar token
+        const token = authHeader.split(' ')[1]; // ✅ Corregido
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
         // Verificar que el usuario existe y está activo
-        const user = await UserModel.findById(decoded.userId);
-        
-        if (!user) {
-            return errorResponse(res, 401, 'Usuario no encontrado');
-        }
+        const user = await UserModel.findById(decoded.id); // Ajuste: decoded.id según payload
 
-        if (!user.activo) {
-            return errorResponse(res, 401, 'Usuario desactivado');
-        }
+        if (!user) return errorResponse(res, 401, 'Usuario no encontrado');
+        if (!user.activo) return errorResponse(res, 401, 'Usuario desactivado');
 
         // Agregar usuario al request
         req.user = {
@@ -45,12 +38,9 @@ const verifyToken = async (req, res, next) => {
 
         next();
     } catch (error) {
-        if (error.name === 'TokenExpiredError') {
-            return errorResponse(res, 401, 'Token expirado');
-        }
-        if (error.name === 'JsonWebTokenError') {
-            return errorResponse(res, 401, 'Token inválido');
-        }
+        if (error.name === 'TokenExpiredError') return errorResponse(res, 401, 'Token expirado');
+        if (error.name === 'JsonWebTokenError') return errorResponse(res, 401, 'Token inválido');
+        console.error(error);
         return errorResponse(res, 500, 'Error al verificar token');
     }
 };
@@ -60,14 +50,8 @@ const verifyToken = async (req, res, next) => {
  */
 const requireRole = (...roles) => {
     return (req, res, next) => {
-        if (!req.user) {
-            return errorResponse(res, 401, 'No autenticado');
-        }
-
-        if (!roles.includes(req.user.rol)) {
-            return errorResponse(res, 403, 'No tienes permisos para realizar esta acción');
-        }
-
+        if (!req.user) return errorResponse(res, 401, 'No autenticado');
+        if (!roles.includes(req.user.rol)) return errorResponse(res, 403, 'No tienes permisos para realizar esta acción');
         next();
     };
 };
@@ -77,12 +61,9 @@ const requireRole = (...roles) => {
  */
 const requirePermission = (resource, action) => {
     return (req, res, next) => {
-        if (!req.user) {
-            return errorResponse(res, 401, 'No autenticado');
-        }
+        if (!req.user) return errorResponse(res, 401, 'No autenticado');
 
         const permisos = req.user.permisos;
-        
         if (!permisos[resource] || !permisos[resource].includes(action)) {
             return errorResponse(res, 403, `No tienes permiso para ${action} en ${resource}`);
         }
@@ -92,7 +73,7 @@ const requirePermission = (resource, action) => {
 };
 
 /**
- * Rate limiting por usuario
+ * Rate limiting por usuario/IP
  */
 const userRateLimit = new Map();
 
@@ -100,7 +81,7 @@ const rateLimitByUser = (maxRequests = 100, windowMs = 60000) => {
     return (req, res, next) => {
         const userId = req.user?.id || req.ip;
         const now = Date.now();
-        
+
         if (!userRateLimit.has(userId)) {
             userRateLimit.set(userId, { count: 1, resetTime: now + windowMs });
             return next();

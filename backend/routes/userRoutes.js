@@ -1,20 +1,22 @@
-/**
- * Rutas de usuarios
- */
 const express = require('express');
 const router = express.Router();
 const UserController = require('../controllers/userController');
-const { verifyToken, requirePermission } = require('../middlewares/authMiddleware');
+const { verifyToken, requireRole } = require('../middlewares/authMiddleware');
 const { validateCreateUser, validateUpdateUser, validatePagination } = require('../middlewares/validationMiddleware');
 
-// Todas las rutas requieren autenticación
-router.use(verifyToken);
+// Obtener todos los usuarios (solo admin o supervisor)
+router.get('/', verifyToken, requireRole('admin', 'supervisor'), validatePagination, UserController.getAllUsers);
 
-// CRUD de usuarios
-router.get('/', requirePermission('usuarios', 'leer'), validatePagination, UserController.getAll);
-router.get('/:id', requirePermission('usuarios', 'leer'), UserController.getById);
-router.post('/', requirePermission('usuarios', 'crear'), validateCreateUser, UserController.create);
-router.put('/:id', requirePermission('usuarios', 'actualizar'), validateUpdateUser, UserController.update);
-router.delete('/:id', requirePermission('usuarios', 'eliminar'), UserController.delete);
+// Obtener usuario por ID (solo admin o supervisor)
+router.get('/:id', verifyToken, requireRole('admin', 'supervisor'), UserController.getUserById);
+
+// Crear usuario (solo admin)
+router.post('/', verifyToken, requireRole('admin'), validateCreateUser, UserController.createUser);
+
+// Actualizar usuario (solo admin)
+router.put('/:id', verifyToken, requireRole('admin'), validateUpdateUser, UserController.updateUser);
+
+// Eliminar usuario (solo admin)
+router.delete('/:id', verifyToken, requireRole('admin'), UserController.deleteUser);
 
 module.exports = router;

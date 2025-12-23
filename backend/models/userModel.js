@@ -1,13 +1,8 @@
-/**
- * Modelo de Usuario - Operaciones con la base de datos
- */
 const pool = require('../config/database');
 const bcrypt = require('bcrypt');
 
 class UserModel {
-    /**
-     * Buscar usuario por username
-     */
+
     static async findByUsername(username) {
         const [rows] = await pool.execute(
             `SELECT u.*, a.nombre as area_nombre, r.nombre as rol_nombre, r.permisos
@@ -17,12 +12,9 @@ class UserModel {
              WHERE u.username = ?`,
             [username]
         );
-        return rows,[object Object], || null;
+        return rows.length ? rows[0] : null;
     }
 
-    /**
-     * Buscar usuario por ID
-     */
     static async findById(id) {
         const [rows] = await pool.execute(
             `SELECT u.id, u.username, u.email, u.nombre_completo, u.activo,
@@ -35,23 +27,17 @@ class UserModel {
              WHERE u.id = ?`,
             [id]
         );
-        return rows,[object Object], || null;
+        return rows.length ? rows[0] : null;
     }
 
-    /**
-     * Buscar usuario por email
-     */
     static async findByEmail(email) {
         const [rows] = await pool.execute(
             'SELECT * FROM usuarios WHERE email = ?',
             [email]
         );
-        return rows,[object Object], || null;
+        return rows.length ? rows[0] : null;
     }
 
-    /**
-     * Obtener todos los usuarios (paginado)
-     */
     static async findAll(page = 1, limit = 10, filters = {}) {
         const offset = (page - 1) * limit;
         let whereClause = 'WHERE 1=1';
@@ -73,14 +59,12 @@ class UserModel {
             params.push(searchTerm, searchTerm, searchTerm);
         }
 
-        // Contar total
         const [countResult] = await pool.execute(
             `SELECT COUNT(*) as total FROM usuarios u ${whereClause}`,
             params
         );
-        const total = countResult,[object Object],total;
+        const total = countResult[0].total;
 
-        // Obtener usuarios
         const [rows] = await pool.execute(
             `SELECT u.id, u.username, u.email, u.nombre_completo, u.activo,
                     u.area_id, a.nombre as area_nombre,
@@ -106,13 +90,8 @@ class UserModel {
         };
     }
 
-    /**
-     * Crear nuevo usuario
-     */
     static async create(userData) {
         const { username, email, password, nombre_completo, area_id, rol_id } = userData;
-        
-        // Hashear contraseña
         const password_hash = await bcrypt.hash(password, parseInt(process.env.BCRYPT_ROUNDS) || 12);
 
         const [result] = await pool.execute(
@@ -124,38 +103,16 @@ class UserModel {
         return { id: result.insertId, username, email, nombre_completo, area_id, rol_id };
     }
 
-    /**
-     * Actualizar usuario
-     */
     static async update(id, userData) {
         const fields = [];
         const values = [];
 
-        // Construir query dinámicamente
-        if (userData.username) {
-            fields.push('username = ?');
-            values.push(userData.username);
-        }
-        if (userData.email) {
-            fields.push('email = ?');
-            values.push(userData.email);
-        }
-        if (userData.nombre_completo) {
-            fields.push('nombre_completo = ?');
-            values.push(userData.nombre_completo);
-        }
-        if (userData.area_id) {
-            fields.push('area_id = ?');
-            values.push(userData.area_id);
-        }
-        if (userData.rol_id) {
-            fields.push('rol_id = ?');
-            values.push(userData.rol_id);
-        }
-        if (userData.activo !== undefined) {
-            fields.push('activo = ?');
-            values.push(userData.activo);
-        }
+        if (userData.username) { fields.push('username = ?'); values.push(userData.username); }
+        if (userData.email) { fields.push('email = ?'); values.push(userData.email); }
+        if (userData.nombre_completo) { fields.push('nombre_completo = ?'); values.push(userData.nombre_completo); }
+        if (userData.area_id) { fields.push('area_id = ?'); values.push(userData.area_id); }
+        if (userData.rol_id) { fields.push('rol_id = ?'); values.push(userData.rol_id); }
+        if (userData.activo !== undefined) { fields.push('activo = ?'); values.push(userData.activo); }
         if (userData.password) {
             const password_hash = await bcrypt.hash(userData.password, parseInt(process.env.BCRYPT_ROUNDS) || 12);
             fields.push('password_hash = ?');
@@ -174,9 +131,6 @@ class UserModel {
         return result.affectedRows > 0;
     }
 
-    /**
-     * Eliminar usuario (soft delete)
-     */
     static async delete(id) {
         const [result] = await pool.execute(
             'UPDATE usuarios SET activo = FALSE WHERE id = ?',
@@ -185,9 +139,6 @@ class UserModel {
         return result.affectedRows > 0;
     }
 
-    /**
-     * Eliminar usuario permanentemente
-     */
     static async hardDelete(id) {
         const [result] = await pool.execute(
             'DELETE FROM usuarios WHERE id = ?',
@@ -196,16 +147,10 @@ class UserModel {
         return result.affectedRows > 0;
     }
 
-    /**
-     * Verificar contraseña
-     */
     static async verifyPassword(plainPassword, hashedPassword) {
         return bcrypt.compare(plainPassword, hashedPassword);
     }
 
-    /**
-     * Actualizar último login
-     */
     static async updateLastLogin(id) {
         await pool.execute(
             'UPDATE usuarios SET ultimo_login = NOW(), intentos_fallidos = 0 WHERE id = ?',
@@ -213,9 +158,6 @@ class UserModel {
         );
     }
 
-    /**
-     * Incrementar intentos fallidos
-     */
     static async incrementFailedAttempts(id) {
         const maxAttempts = parseInt(process.env.MAX_LOGIN_ATTEMPTS) || 5;
         const lockMinutes = parseInt(process.env.LOCK_TIME_MINUTES) || 30;
@@ -232,48 +174,33 @@ class UserModel {
         );
     }
 
-    /**
-     * Verificar si usuario está bloqueado
-     */
     static async isLocked(id) {
         const [rows] = await pool.execute(
             'SELECT bloqueado_hasta FROM usuarios WHERE id = ? AND bloqueado_hasta > NOW()',
             [id]
         );
-        return rows.length > 0 ? rows,[object Object],bloqueado_hasta : null;
+        return rows.length ? rows[0].bloqueado_hasta : null;
     }
 
-    /**
-     * Guardar refresh token
-     */
-    static async saveRefreshToken(userId, refreshToken, userAgent, ipAddress, expiresIn) {
+    static async saveRefreshToken(userId, refreshToken, userAgent, ipAddress, expiresInDays) {
         await pool.execute(
             `INSERT INTO sesiones (usuario_id, refresh_token, user_agent, ip_address, expira_en)
              VALUES (?, ?, ?, ?, DATE_ADD(NOW(), INTERVAL ? DAY))`,
-            [userId, refreshToken, userAgent, ipAddress, expiresIn]
+            [userId, refreshToken, userAgent, ipAddress, expiresInDays]
         );
     }
 
-    /**
-     * Verificar refresh token
-     */
     static async verifyRefreshToken(refreshToken) {
         const [rows] = await pool.execute(
             `SELECT s.*, u.username, u.activo
              FROM sesiones s
              JOIN usuarios u ON s.usuario_id = u.id
-             WHERE s.refresh_token = ? 
-             AND s.revocado = FALSE 
-             AND s.expira_en > NOW()
-             AND u.activo = TRUE`,
+             WHERE s.refresh_token = ? AND s.revocado = FALSE AND s.expira_en > NOW() AND u.activo = TRUE`,
             [refreshToken]
         );
-        return rows,[object Object], || null;
+        return rows.length ? rows[0] : null;
     }
 
-    /**
-     * Revocar refresh token
-     */
     static async revokeRefreshToken(refreshToken) {
         await pool.execute(
             'UPDATE sesiones SET revocado = TRUE WHERE refresh_token = ?',
@@ -281,9 +208,6 @@ class UserModel {
         );
     }
 
-    /**
-     * Revocar todos los tokens de un usuario
-     */
     static async revokeAllUserTokens(userId) {
         await pool.execute(
             'UPDATE sesiones SET revocado = TRUE WHERE usuario_id = ?',
@@ -291,9 +215,6 @@ class UserModel {
         );
     }
 
-    /**
-     * Registrar en log de auditoría
-     */
     static async logAudit(userId, accion, tablaAfectada, registroId, datosAnteriores, datosNuevos, ipAddress, userAgent) {
         await pool.execute(
             `INSERT INTO logs_auditoria 

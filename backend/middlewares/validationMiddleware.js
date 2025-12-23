@@ -1,143 +1,65 @@
-/**
- * Middlewares de validación con express-validator
- */
 const { body, param, query, validationResult } = require('express-validator');
 const { errorResponse } = require('../utils/helpers');
 
-/**
- * Procesar errores de validación
- */
 const handleValidationErrors = (req, res, next) => {
     const errors = validationResult(req);
-    
     if (!errors.isEmpty()) {
         const formattedErrors = errors.array().map(err => ({
             field: err.path,
             message: err.msg
         }));
-        
         return errorResponse(res, 400, 'Error de validación', formattedErrors);
     }
-    
     next();
 };
 
-/**
- * Validaciones para login
- */
+// Validación login
 const validateLogin = [
     body('username')
-        .trim()
-        .notEmpty().withMessage('El usuario es requerido')
+        .trim().notEmpty().withMessage('El usuario es requerido')
         .isLength({ min: 3, max: 50 }).withMessage('El usuario debe tener entre 3 y 50 caracteres')
-        .matches(/^[a-zA-Z0-9_]+$/).withMessage('El usuario solo puede contener letras, números y guiones bajos'),
-    
+        .matches(/^[a-zA-Z0-9_]+$/).withMessage('Solo letras, números y guiones bajos'),
     body('password')
         .notEmpty().withMessage('La contraseña es requerida')
-        .isLength({ min: 6 }).withMessage('La contraseña debe tener al menos 6 caracteres'),
-    
+        .isLength({ min: 6 }).withMessage('Debe tener al menos 6 caracteres'),
     handleValidationErrors
 ];
 
-/**
- * Validaciones para crear usuario
- */
+// Validación crear usuario
 const validateCreateUser = [
-    body('username')
-        .trim()
-        .notEmpty().withMessage('El usuario es requerido')
-        .isLength({ min: 3, max: 50 }).withMessage('El usuario debe tener entre 3 y 50 caracteres')
-        .matches(/^[a-zA-Z0-9_]+$/).withMessage('El usuario solo puede contener letras, números y guiones bajos'),
-    
-    body('email')
-        .trim()
-        .notEmpty().withMessage('El email es requerido')
-        .isEmail().withMessage('Email inválido')
-        .normalizeEmail(),
-    
+    body('username').trim().notEmpty().withMessage('Usuario requerido').isLength({ min: 3, max: 50 }),
+    body('email').trim().notEmpty().withMessage('Email requerido').isEmail().normalizeEmail(),
     body('password')
-        .notEmpty().withMessage('La contraseña es requerida')
-        .isLength({ min: 8 }).withMessage('La contraseña debe tener al menos 8 caracteres')
-        .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/)
-        .withMessage('La contraseña debe contener mayúsculas, minúsculas, números y caracteres especiales'),
-    
-    body('nombre_completo')
-        .trim()
-        .notEmpty().withMessage('El nombre completo es requerido')
-        .isLength({ min: 2, max: 150 }).withMessage('El nombre debe tener entre 2 y 150 caracteres')
-        .matches(/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/).withMessage('El nombre solo puede contener letras'),
-    
-    body('area_id')
-        .notEmpty().withMessage('El área es requerida')
-        .isInt({ min: 1 }).withMessage('Área inválida'),
-    
-    body('rol_id')
-        .optional()
-        .isInt({ min: 1 }).withMessage('Rol inválido'),
-    
+        .notEmpty().withMessage('Contraseña requerida')
+        .isLength({ min: 8 }).withMessage('Mínimo 8 caracteres')
+        .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])/)
+        .withMessage('Debe incluir mayúsculas, minúsculas, números y caracteres especiales'),
+    body('nombre_completo').trim().notEmpty().withMessage('Nombre completo requerido').isLength({ min: 2, max: 150 }),
+    body('area_id').notEmpty().withMessage('Área requerida').isInt({ min: 1 }),
+    body('rol_id').optional().isInt({ min: 1 }),
     handleValidationErrors
 ];
 
-/**
- * Validaciones para actualizar usuario
- */
+// Validación actualizar usuario
 const validateUpdateUser = [
-    param('id')
-        .isInt({ min: 1 }).withMessage('ID de usuario inválido'),
-    
-    body('username')
-        .optional()
-        .trim()
-        .isLength({ min: 3, max: 50 }).withMessage('El usuario debe tener entre 3 y 50 caracteres')
-        .matches(/^[a-zA-Z0-9_]+$/).withMessage('El usuario solo puede contener letras, números y guiones bajos'),
-    
-    body('email')
-        .optional()
-        .trim()
-        .isEmail().withMessage('Email inválido')
-        .normalizeEmail(),
-    
-    body('password')
-        .optional()
-        .isLength({ min: 8 }).withMessage('La contraseña debe tener al menos 8 caracteres')
-        .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/)
-        .withMessage('La contraseña debe contener mayúsculas, minúsculas, números y caracteres especiales'),
-    
-    body('nombre_completo')
-        .optional()
-        .trim()
-        .isLength({ min: 2, max: 150 }).withMessage('El nombre debe tener entre 2 y 150 caracteres'),
-    
-    body('area_id')
-        .optional()
-        .isInt({ min: 1 }).withMessage('Área inválida'),
-    
-    body('activo')
-        .optional()
-        .isBoolean().withMessage('El campo activo debe ser verdadero o falso'),
-    
+    param('id').isInt({ min: 1 }).withMessage('ID inválido'),
+    body('username').optional().trim().isLength({ min: 3, max: 50 }).matches(/^[a-zA-Z0-9_]+$/),
+    body('email').optional().trim().isEmail().normalizeEmail(),
+    body('password').optional()
+        .isLength({ min: 8 })
+        .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])/),
+    body('nombre_completo').optional().trim().isLength({ min: 2, max: 150 }),
+    body('area_id').optional().isInt({ min: 1 }),
+    body('rol_id').optional().isInt({ min: 1 }),
+    body('activo').optional().isBoolean(),
     handleValidationErrors
 ];
 
-/**
- * Validación de paginación
- */
+// Validación paginación
 const validatePagination = [
-    query('page')
-        .optional()
-        .isInt({ min: 1 }).withMessage('Página inválida'),
-    
-    query('limit')
-        .optional()
-        .isInt({ min: 1, max: 100 }).withMessage('Límite debe ser entre 1 y 100'),
-    
+    query('page').optional().isInt({ min: 1 }),
+    query('limit').optional().isInt({ min: 1, max: 100 }),
     handleValidationErrors
 ];
 
-module.exports = {
-    validateLogin,
-    validateCreateUser,
-    validateUpdateUser,
-    validatePagination,
-    handleValidationErrors
-};
+module.exports = { validateLogin, validateCreateUser, validateUpdateUser, validatePagination, handleValidationErrors };

@@ -1,206 +1,116 @@
-/**
- * Controlador de Usuarios (CRUD)
- */
 const UserModel = require('../models/userModel');
 const { successResponse, errorResponse } = require('../utils/helpers');
+const jwt = require('jsonwebtoken');
+require('dotenv').config();
 
 class UserController {
-    /**
-     * Obtener todos los usuarios
-     */
-    static async getAll(req, res) {
+
+    static async login(req, res) {
+        try {
+            const { username, password } = req.body;
+            const user = await UserModel.findByUsername(username);
+            if (!user) return errorResponse(res, 401, 'Usuario o contraseña incorrecta');
+
+            const valid = await UserModel.verifyPassword(password, user.password_hash);
+            if (!valid) {
+                await UserModel.incrementFailedAttempts(user.id);
+                return errorResponse(res, 401, 'Usuario o contraseña incorrecta');
+            }
+
+            if (user.bloqueado_hasta && new Date(user.bloqueado_hasta) > new Date()) {
+                return errorResponse(res, 403, `Usuario bloqueado hasta ${user.bloqueado_hasta}`);
+            }
+
+            await UserModel.updateLastLogin(user.id);
+
+            const payload = { id: user.id, username: user.username, rol_nombre: user.rol_nombre };
+            const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: process.env.JWT_EXPIRES_IN });
+            const refreshToken = jwt.sign(payload, process.env.JWT_REFRESH_SECRET, { expiresIn: process.env.JWT_REFRESH_EXPIRES_IN });
+
+            await UserModel.saveRefreshToken(user.id, refreshToken, req.headers['user-agent'], req.ip, 7);
+
+            successResponse(res, { token, refreshToken });
+        } catch (err) {
+            console.error(err);
+            errorResponse(res);
+        }
+    }
+
+    static async refreshToken(req, res) {
+        try {
+            const { refreshToken } = req.body;
+            if (!refreshToken) return errorResponse(res, 401, 'Refresh token requerido');
+
+            const session = await UserModel.verifyRefreshToken(refreshToken);
+            if (!session) return errorResponse(res, 401, 'Refresh token inválido o expirado');
+
+            const payload = { id: session.usuario_id, username: session.username, rol_nombre: session.rol_nombre };
+            const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: process.env.JWT_EXPIRES_IN });
+
+            successResponse(res, { token });
+        } catch (err) {
+            console.error(err);
+            errorResponse(res);
+        }
+    }
+
+    static async getAllUsers(req, res) {
         try {
             const page = parseInt(req.query.page) || 1;
             const limit = parseInt(req.query.limit) || 10;
             const filters = {
-                activo: req.query.activo !== undefined ? req.query.activo === 'true' : undefined,
+                activo: req.query.activo,
                 area_id: req.query.area_id,
                 search: req.query.search
             };
-
-            const result = await UserModel.findAll(page, limit, filters);
-
-            return successResponse(res, 200, 'Usuarios obtenidos', result);
-
-        } catch (error) {
-            console.error('Error al obtener usuarios:', error);
-            return errorResponse(res, 500, 'Error interno del servidor');
+            const data = await UserModel.findAll(page, limit, filters);
+            successResponse(res, data);
+        } catch (err) {
+            console.error(err);
+            errorResponse(res);
         }
     }
 
-    /**
-     * Obtener usuario por ID
-     */
-    static async getById(req, res) {
+    static async getUserById(req, res) {
         try {
-            const { id } = req.params;
-            const user = await UserModel.findById(id);
-
-            if (!user) {
-                return errorResponse(res, 404, 'Usuario no encontrado');
-            }
-
-            return successResponse(res, 200, 'Usuario obtenido', { user });
-
-        } catch (error) {
-            console.error('Error al obtener usuario:', error);
-            return errorResponse(res, 500, 'Error interno del servidor');
+            const user = await UserModel.findById(req.params.id);
+            if (!user) return errorResponse(res, 404, 'Usuario no encontrado');
+            successResponse(res, user);
+        } catch (err) {
+            console.error(err);
+            errorResponse(res);
         }
     }
 
-    /**
-     * Crear nuevo usuario
-     */
-    static async create(req, res) {
+    static async createUser(req, res) {
         try {
-            const { username, email, password, nombre_completo, area_id, rol_id } = req.body;
-            const ipAddress = req.ip;
-            const userAgent = req.headers['user-agent'];
-
-            // Verificar si username ya existe
-            const existingUsername = await UserModel.findByUsername(username);
-            if (existingUsername) {
-                return errorResponse(res, 409, 'El nombre de usuario ya está en uso');
-            }
-
-            // Verificar si email ya existe
-            const existingEmail = await UserModel.findByEmail(email);
-            if (existingEmail) {
-                return errorResponse(res, 409, 'El email ya está registrado');
-            }
-
-            // Crear usuario
-            const newUser = await UserModel.create({
-                username,
-                email,
-                password,
-                nombre_completo,
-                area_id,
-                rol_id
-            });
-
-            // Log de auditoría
-            await UserModel.logAudit(
-                req.user.id, 
-                'CREAR_USUARIO', 
-                'usuarios', 
-                newUser.id,
-                null,
-                { username, email, nombre_completo, area_id, rol_id },
-                ipAddress,
-                userAgent
-            );
-
-            return successResponse(res, 201, 'Usuario creado exitosamente', { user: newUser });
-
-        } catch (error) {
-            console.error('Error al crear usuario:', error);
-            return errorResponse(res, 500, 'Error interno del servidor');
+            const user = await UserModel.create(req.body);
+            successResponse(res, user, 'Usuario creado correctamente', 201);
+        } catch (err) {
+            console.error(err);
+            errorResponse(res);
         }
     }
 
-    /**
-     * Actualizar usuario
-     */
-    static async update(req, res) {
+    static async updateUser(req, res) {
         try {
-            const { id } = req.params;
-            const updateData = req.body;
-            const ipAddress = req.ip;
-            const userAgent = req.headers['user-agent'];
-
-            // Verificar que el usuario existe
-            const existingUser = await UserModel.findById(id);
-            if (!existingUser) {
-                return errorResponse(res, 404, 'Usuario no encontrado');
-            }
-
-            // Verificar username único si se está actualizando
-            if (updateData.username && updateData.username !== existingUser.username) {
-                const usernameExists = await UserModel.findByUsername(updateData.username);
-                if (usernameExists) {
-                    return errorResponse(res, 409, 'El nombre de usuario ya está en uso');
-                }
-            }
-
-            // Verificar email único si se está actualizando
-            if (updateData.email && updateData.email !== existingUser.email) {
-                const emailExists = await UserModel.findByEmail(updateData.email);
-                if (emailExists) {
-                    return errorResponse(res, 409, 'El email ya está registrado');
-                }
-            }
-
-            // Actualizar
-            const updated = await UserModel.update(id, updateData);
-
-            if (!updated) {
-                return errorResponse(res, 400, 'No se realizaron cambios');
-            }
-
-            // Log de auditoría
-            await UserModel.logAudit(
-                req.user.id,
-                'ACTUALIZAR_USUARIO',
-                'usuarios',
-                parseInt(id),
-                { username: existingUser.username, email: existingUser.email },
-                updateData,
-                ipAddress,
-                userAgent
-            );
-
-            const updatedUser = await UserModel.findById(id);
-
-            return successResponse(res, 200, 'Usuario actualizado exitosamente', { user: updatedUser });
-
-        } catch (error) {
-            console.error('Error al actualizar usuario:', error);
-            return errorResponse(res, 500, 'Error interno del servidor');
+            const updated = await UserModel.update(req.params.id, req.body);
+            if (!updated) return errorResponse(res, 404, 'Usuario no encontrado o sin cambios');
+            successResponse(res, null, 'Usuario actualizado correctamente');
+        } catch (err) {
+            console.error(err);
+            errorResponse(res);
         }
     }
 
-    /**
-     * Eliminar usuario (soft delete)
-     */
-    static async delete(req, res) {
+    static async deleteUser(req, res) {
         try {
-            const { id } = req.params;
-            const ipAddress = req.ip;
-            const userAgent = req.headers['user-agent'];
-
-            // No permitir auto-eliminación
-            if (parseInt(id) === req.user.id) {
-                return errorResponse(res, 400, 'No puedes eliminar tu propia cuenta');
-            }
-
-            const existingUser = await UserModel.findById(id);
-            if (!existingUser) {
-                return errorResponse(res, 404, 'Usuario no encontrado');
-            }
-
-            await UserModel.delete(id);
-
-            // Revocar todas las sesiones del usuario eliminado
-            await UserModel.revokeAllUserTokens(id);
-
-            // Log de auditoría
-            await UserModel.logAudit(
-                req.user.id,
-                'ELIMINAR_USUARIO',
-                'usuarios',
-                parseInt(id),
-                { username: existingUser.username, email: existingUser.email },
-                null,
-                ipAddress,
-                userAgent
-            );
-
-            return successResponse(res, 200, 'Usuario eliminado exitosamente');
-
-        } catch (error) {
-            console.error('Error al eliminar usuario:', error);
-            return errorResponse(res, 500, 'Error interno del servidor');
+            const deleted = await UserModel.delete(req.params.id);
+            if (!deleted) return errorResponse(res, 404, 'Usuario no encontrado');
+            successResponse(res, null, 'Usuario desactivado correctamente');
+        } catch (err) {
+            console.error(err);
+            errorResponse(res);
         }
     }
 }
