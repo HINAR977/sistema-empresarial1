@@ -212,12 +212,14 @@ body {
 </div>
 
 <!-- DASHBOARD -->
-<div class="dashboard-layout" id="dashboard" style="display:none;">
+<div class="dashboard-layout hidden" id="dashboard">
+
     <div class="sidebar">
         <div class="sidebar-header">
             <img src="assets/logo-small.png" alt="Logo">
             <h3>System Admin</h3>
         </div>
+
         <nav class="sidebar-nav">
             <a href="#" onclick="mostrarSeccion('dashboard-home')"><i class="fas fa-home"></i> Inicio</a>
             <a href="#" onclick="mostrarSeccion('usuarios')"><i class="fas fa-users"></i> Usuarios</a>
@@ -225,55 +227,52 @@ body {
             <a href="#" onclick="mostrarSeccion('clientes')"><i class="fas fa-handshake"></i> Clientes</a>
             <a href="#" onclick="mostrarSeccion('reportes')"><i class="fas fa-chart-line"></i> Reportes</a>
         </nav>
+
         <div class="sidebar-footer">
             <a href="#" class="logout-btn" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Cerrar Sesión</a>
         </div>
-    </div>
+    </div> <!-- cierre sidebar -->
 
     <div class="main-content">
         <header class="topbar">
             <h1 id="tituloSeccion" class="page-title">Usuarios</h1>
-            <div class="user-profile"><span id="userNameDisplay">Bienvenido, Admin</span><i class="fas fa-user-circle"></i></div>
+            <div class="user-profile">
+                <span id="userNameDisplay">Bienvenido, Admin</span>
+                <i class="fas fa-user-circle" aria-hidden="true"></i>
+            </div>
         </header>
 
         <div class="content-area-sections">
             <div id="dashboard-home" class="content-section"></div>
+
             <div id="usuarios" class="content-section active">
                 <div class="section-actions">
-                    <button class="btn-primary" onclick="openFormUsuario()"><i class="fas fa-plus"></i> Agregar Usuario</button>
+                    <button class="btn-primary" onclick="openFormUsuario()">
+                        <i class="fas fa-plus"></i> Agregar Usuario
+                    </button>
                 </div>
                 <table id="tablaUsuarios" class="data-table">
                     <thead>
                         <tr>
-                            <th>ID</th><th>Nombre</th><th>Email</th><th>Acciones</th>
+                            <th>ID</th>
+                            <th>Nombre</th>
+                            <th>Email</th>
+                            <th>Acciones</th>
                         </tr>
                     </thead>
                     <tbody></tbody>
                 </table>
             </div>
+
             <div id="productos" class="content-section"></div>
             <div id="clientes" class="content-section"></div>
-            <div id="reportes" class="content-section"><canvas id="chartReportes"></canvas></div>
-        </div>
-
-        <!-- MODAL USUARIO -->
-        <div id="modalUsuario" class="modal" style="display:none;">
-            <div class="modal-content">
-                <h2 id="tituloFormUsuario">Nuevo Usuario</h2>
-                <form id="formUsuario">
-                    <input type="hidden" id="idUsuario">
-                    <div class="input-group"><i class="fas fa-user"></i><input type="text" id="nombreUsuario" placeholder="Nombre completo" required></div>
-                    <div class="input-group"><i class="fas fa-envelope"></i><input type="email" id="emailUsuario" placeholder="Correo electrónico" required></div>
-                    <div class="input-group"><i class="fas fa-lock"></i><input type="password" id="passwordUsuario" placeholder="Contraseña" required><i class="fas fa-eye password-toggle" id="togglePassModal"></i></div>
-                    <div class="form-buttons">
-                        <button type="button" class="btn-save" onclick="guardarUsuario()"><i class="fas fa-save"></i> Guardar</button>
-                        <button type="button" class="btn-cancelar" onclick="closeFormUsuario()"><i class="fas fa-times-circle"></i> Cancelar</button>
-                    </div>
-                </form>
+            <div id="reportes" class="content-section">
+                <canvas id="chartReportes"></canvas>
             </div>
-        </div>
-    </div>
-</div>
+        </div> <!-- cierre content-area-sections -->
+    </div> <!-- cierre main-content -->
+
+</div> <!-- cierre dashboard-layout -->
 
 <!-- SCRIPTS -->
 <script>
