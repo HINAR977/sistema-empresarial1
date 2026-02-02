@@ -1,28 +1,36 @@
+// 1️⃣ Cargar dependencias
 const express = require('express');
-const cors = require('cors');
-require('dotenv').config();
+const dotenv = require('dotenv');
+dotenv.config();
 
-const authRoutes = require('./routes/authRoutes');
-const userRoutes = require('./routes/userRoutes');
+const connectMongoDB = require('./config/dbMongo'); // Ajusta la ruta según tu proyecto
+const { connectMySQL } = require('./config/dbMySQL'); // Ajusta la ruta según tu proyecto
 
+// 2️⃣ Conectar bases de datos
+connectMongoDB();
+connectMySQL();
+
+// 3️⃣ Crear app Express
 const app = express();
-
-// Middlewares
-app.use(cors({ origin: process.env.FRONTEND_URL || '*' }));
 app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
 
-// Routes
-app.use('/api/auth', authRoutes);
-app.use('/api/users', userRoutes);
+// 4️⃣ Importar rutas
+const mongoUserRoutes = require('./routes/mongoUserRoutes');
+const mysqlUserRoutes = require('./routes/mysqlUserRoutes');
 
-// Error 404
-app.use((req, res) => {
-    res.status(404).json({ success: false, message: 'Ruta no encontrada' });
+// 5️⃣ Registrar rutas
+app.use('/api/mongo-users', mongoUserRoutes);
+app.use('/api/mysql-users', mysqlUserRoutes);
+
+// 6️⃣ Ruta raíz
+app.get('/', (req, res) => {
+  res.send('API funcionando correctamente');
 });
 
-// Start server
+// 7️⃣ Puerto del servidor
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-    console.log(`Servidor corriendo en puerto ${PORT}`);
+
+// 🔹 Escuchar en todas las interfaces (0.0.0.0) para evitar problemas de localhost
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`Servidor corriendo en http://localhost:${PORT}`);
 });

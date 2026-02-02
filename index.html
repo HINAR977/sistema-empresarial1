@@ -3,467 +3,222 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Enterprise System | Dashboard</title>
-<meta name="description" content="Panel administrativo para gestión empresarial.">
-<meta name="robots" content="noindex, nofollow">
+<title>Enterprise System | Login Premium</title>
 
-<!-- FontAwesome para iconos -->
+<!-- FontAwesome -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
 
-<!-- Chart.js -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-<!-- Estilos -->
 <style>
-/* -------------------- RESET -------------------- */
-* { margin:0; padding:0; box-sizing:border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-
-/* -------------------- BODY -------------------- */
 body {
-    background-color: #f4f6f8;
-    color: #333;
-    min-height: 100vh;
+    margin: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: linear-gradient(-45deg, #0D47A1, #1976D2, #42A5F5, #0D47A1);
+    background-size: 400% 400%;
+    animation: gradientBG 15s ease infinite;
 }
 
-/* -------------------- LOGIN -------------------- */
-.auth-wrapper {
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    min-height:100vh;
+@keyframes gradientBG {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
 }
 
+/* Contenedor principal */
 .auth-container {
-    background:#fff;
-    padding:40px 30px;
-    border-radius:15px;
-    box-shadow: 0 15px 40px rgba(0,0,0,0.2);
-    width:360px;
-    text-align:center;
+    background: rgba(255, 255, 255, 0.98);
+    padding: 36px 28px;
+    border-radius: 18px;
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.12);
+    width: 360px;
+    max-width: 90%;
+    text-align: center;
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
 }
 
-.auth-logo { width:100px; margin-bottom:20px; }
-.auth-title { margin-bottom:25px; font-size:24px; color:#007BFF; }
+.auth-container:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 16px 36px rgba(0, 0, 0, 0.16);
+}
 
+.auth-container h2, .auth-title {
+    color: #007BFF;
+    margin-bottom: 24px;
+    font-weight: 600;
+}
+
+.auth-title {
+    font-size: 2.2em;
+    color: #0D47A1;
+    margin-bottom: 35px;
+    font-weight: 700;
+    letter-spacing: 1px;
+}
+
+.auth-logo {
+    width: 100px;
+    margin-bottom: 25px;
+    transition: transform 0.3s;
+}
+.auth-logo:hover {
+    transform: rotate(5deg);
+}
+
+/* Input fields */
 .input-group {
-    position:relative;
-    margin:15px 0;
+    position: relative;
+    margin-bottom: 25px;
+    transition: all 0.3s ease;
 }
 
 .input-group input {
-    width:100%;
-    padding:12px 40px 12px 12px;
-    border-radius:8px;
-    border:1px solid #ccc;
-    background:#f4f6f8;
-    color:#333;
+    width: 100%;
+    padding: 14px 45px 14px 45px;
+    border: 2px solid #ccc;
+    border-radius: 12px;
+    font-size: 1em;
+    background: #f7f7f7;
+    box-sizing: border-box;
+    transition: all 0.3s ease;
 }
 
-.input-group i { position:absolute; right:12px; top:50%; transform:translateY(-50%); cursor:pointer; color:#888; }
-
-.btn-submit {
-    width:100%;
-    padding:12px;
-    background:#007BFF;
-    border:none;
-    border-radius:8px;
-    cursor:pointer;
-    font-size:16px;
-    font-weight:600;
-    transition:0.3s;
-}
-
-.btn-submit:hover { background:#0056b3; }
-
-.auth-footer { margin-top:15px; font-size:14px; color:#666; }
-.auth-footer a { color:#007BFF; text-decoration:none; margin:0 5px; }
-.auth-footer a:hover { text-decoration:underline; }
-
-/* -------------------- DASHBOARD -------------------- */
-.dashboard-layout { display:flex; min-height:100vh; }
-
-.sidebar {
-    width:250px;
-    background:#007BFF;
-    flex-shrink:0;
-    display:flex;
-    flex-direction:column;
-    padding-top:20px;
-    color:#fff;
-}
-
-.sidebar-header { text-align:center; margin-bottom:25px; }
-.sidebar-header img { width:60px; margin-bottom:10px; }
-.sidebar-header h3 { font-size:20px; color:#fff; }
-
-.sidebar-nav a {
-    display:block;
-    padding:12px 25px;
-    color:#fff;
-    text-decoration:none;
-    border-left:4px solid transparent;
-    transition:0.3s;
-    font-weight:500;
-}
-
-.sidebar-nav a:hover {
-    background:#0056b3;
-    border-left:4px solid #ffc107;
-}
-
-.sidebar-footer { margin-top:auto; padding:20px; }
-.logout-btn { display:flex; align-items:center; justify-content:flex-start; }
-
-/* -------------------- MAIN CONTENT -------------------- */
-.main-content { flex:1; background:#f4f6f8; padding:25px; }
-
-.topbar {
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    margin-bottom:20px;
-    padding-bottom:10px;
-}
-
-.page-title { font-size:22px; color:#007BFF; }
-.user-profile { display:flex; align-items:center; gap:10px; color:#333; }
-
-.content-area-sections { margin-top:20px; }
-
-.content-section { display:none; }
-.content-section.active { display:block; }
-
-.section-actions { margin-bottom:15px; }
-
-.data-table {
-    width:100%;
-    border-collapse:collapse;
+.input-group input:focus {
+    border-color: #0D47A1;
     background:#fff;
-    border-radius:8px;
-    overflow:hidden;
-    box-shadow:0 2px 8px rgba(0,0,0,0.1);
+    outline:none;
+    box-shadow: 0 0 8px rgba(13,71,161,0.5);
 }
 
-.data-table th, .data-table td { padding:12px; text-align:left; }
-.data-table th { background:#007BFF; color:#fff; }
-.data-table tr:nth-child(even) { background:#f2f2f2; }
+.input-group i.lock-icon {
+    position: absolute;
+    top: 50%;
+    left: 14px;
+    transform: translateY(-50%);
+    color: #1976D2;
+    transition: transform 0.3s;
+}
+
+.input-group i.eye-toggle {
+    position: absolute;
+    top: 50%;
+    right: 14px;
+    transform: translateY(-50%);
+    cursor: pointer;
+    color: #1976D2;
+    transition: color 0.3s, transform 0.3s;
+}
+
+.input-group input:focus ~ .lock-icon { transform: scale(1.05); }
+.input-group input:focus ~ .eye-toggle { transform: scale(1.05); }
 
 /* Botones */
-.btn-primary {
-    padding:8px 15px;
-    background:#007BFF;
-    border:none;
-    border-radius:6px;
-    cursor:pointer;
-    color:#fff;
-    transition:0.3s;
+.btn-submit {
+    width: 100%;
+    padding: 14px;
+    font-size: 1em;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    color: #fff;
+    font-weight: 700;
+    background: linear-gradient(135deg, #0D47A1, #42A5F5);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.25);
+    transition: all 0.3s ease;
 }
-.btn-primary:hover { background:#0056b3; }
+.btn-submit:hover {
+    background: linear-gradient(135deg,#1976D2,#90CAF9);
+    transform: translateY(-2px);
+    box-shadow: 0 12px 25px rgba(0,0,0,0.35);
+}
 
-.edit-btn { background:#ffc107; color:#000; padding:5px 12px; border-radius:6px; border:none; cursor:pointer; }
-.edit-btn:hover { background:#e0a800; }
-
-.delete-btn { background:#dc3545; color:#fff; padding:5px 12px; border-radius:6px; border:none; cursor:pointer; }
-.delete-btn:hover { background:#c82333; }
-
-/* Modal */
-.modal { position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.5); display:flex; justify-content:center; align-items:center; z-index:100; }
-.modal-content { background:#fff; padding:25px; border-radius:15px; width:400px; box-shadow:0 15px 40px rgba(0,0,0,0.2); }
-
-.modal-content h2 { margin-bottom:15px; color:#007BFF; }
-.form-buttons { display:flex; justify-content:flex-end; gap:10px; margin-top:15px; }
-.form-buttons button { padding:8px 12px; border-radius:6px; border:none; cursor:pointer; }
-.btn-cancelar { background:#dc3545; color:#fff; }
-.btn-save { background:#007BFF; color:#fff; }
-.btn-cancelar:hover { background:#c82333; }
-.btn-save:hover { background:#0056b3; }
-
-/* Responsive */
-@media(max-width:768px) {
-    .dashboard-layout { flex-direction:column; }
-    .sidebar { width:100%; flex-direction:row; overflow-x:auto; }
-    .sidebar-nav a { flex:1; text-align:center; border-left:none; }
+/* Footer */
+.auth-footer {
+    margin-top: 25px;
+    font-size: 0.9em;
+    color: #555;
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    transition: all 0.3s;
+}
+.auth-footer a {
+    color: #1976D2;
+    text-decoration: none;
+    transition: color 0.3s;
+}
+.auth-footer a:hover {
+    color: #0D47A1;
+    text-decoration: underline;
 }
 </style>
 </head>
 <body>
 
-<!-- LOGIN -->
-<div class="auth-wrapper" id="loginSection">
-    <div class="auth-container">
-        <img src="assets/logo.png" alt="Logo" class="auth-logo">
-        <h1 class="auth-title">Acceso al Sistema</h1>
-        <form id="loginForm">
-            <div class="input-group">
-                <i class="fas fa-envelope"></i>
-                <input type="email" id="email" placeholder="Correo electrónico" required>
-            </div>
-            <div class="input-group">
-                <i class="fas fa-lock"></i>
-                <input type="password" id="password" placeholder="Contraseña" required>
-                <i class="fas fa-eye password-toggle" id="togglePassLogin"></i>
-            </div>
-            <button type="submit" class="btn-submit">Ingresar</button>
-        </form>
-        <div class="auth-footer">
-            <a href="#">Crear cuenta</a> | <a href="#">Olvidé mi contraseña</a>
+<div class="auth-container">
+    <img src="assets/logo.png" alt="Logo" class="auth-logo">
+    <h1 class="auth-title">Acceso al Sistema</h1>
+    <form id="loginForm">
+        <div class="input-group">
+            <input type="email" id="email" placeholder="Correo electrónico" required maxlength="50">
+            <i class="fas fa-envelope lock-icon"></i>
         </div>
+        <div class="input-group">
+            <input type="password" id="password" placeholder="Contraseña" required maxlength="30">
+            <i class="fas fa-lock lock-icon"></i>
+            <i class="fas fa-eye eye-toggle" id="togglePassLogin" role="button" aria-label="Mostrar contraseña"></i>
+        </div>
+        <button type="submit" class="btn-submit">Ingresar</button>
+    </form>
+    <div class="auth-footer">
+        <a href="#">Crear cuenta</a> | <a href="#">Olvidé mi contraseña</a>
     </div>
 </div>
 
-<!-- DASHBOARD -->
-<div class="dashboard-layout hidden" id="dashboard">
-
-    <div class="sidebar">
-        <div class="sidebar-header">
-            <img src="assets/logo-small.png" alt="Logo">
-            <h3>System Admin</h3>
-        </div>
-
-        <nav class="sidebar-nav">
-            <a href="#" onclick="mostrarSeccion('dashboard-home')"><i class="fas fa-home"></i> Inicio</a>
-            <a href="#" onclick="mostrarSeccion('usuarios')"><i class="fas fa-users"></i> Usuarios</a>
-            <a href="#" onclick="mostrarSeccion('productos')"><i class="fas fa-box-open"></i> Productos</a>
-            <a href="#" onclick="mostrarSeccion('clientes')"><i class="fas fa-handshake"></i> Clientes</a>
-            <a href="#" onclick="mostrarSeccion('reportes')"><i class="fas fa-chart-line"></i> Reportes</a>
-        </nav>
-
-        <div class="sidebar-footer">
-            <a href="#" class="logout-btn" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Cerrar Sesión</a>
-        </div>
-    </div> <!-- cierre sidebar -->
-
-    <div class="main-content">
-        <header class="topbar">
-            <h1 id="tituloSeccion" class="page-title">Usuarios</h1>
-            <div class="user-profile">
-                <span id="userNameDisplay">Bienvenido, Admin</span>
-                <i class="fas fa-user-circle" aria-hidden="true"></i>
-            </div>
-        </header>
-
-        <div class="content-area-sections">
-            <div id="dashboard-home" class="content-section"></div>
-
-            <div id="usuarios" class="content-section active">
-                <div class="section-actions">
-                    <button class="btn-primary" onclick="openFormUsuario()">
-                        <i class="fas fa-plus"></i> Agregar Usuario
-                    </button>
-                </div>
-                <table id="tablaUsuarios" class="data-table">
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Nombre</th>
-                            <th>Email</th>
-                            <th>Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody></tbody>
-                </table>
-            </div>
-
-            <div id="productos" class="content-section"></div>
-            <div id="clientes" class="content-section"></div>
-            <div id="reportes" class="content-section">
-                <canvas id="chartReportes"></canvas>
-            </div>
-        </div> <!-- cierre content-area-sections -->
-    </div> <!-- cierre main-content -->
-
-</div> <!-- cierre dashboard-layout -->
-
-<!-- SCRIPTS -->
 <script>
-// -------------------- USUARIOS DE PRUEBA --------------------
-let usuarios = [
-    { id:1, name:"Admin Master", email:"admin@empresa.com", role:"admin", section:"dashboard-home" },
-    { id:2, name:"Usuario Ventas", email:"ventas@empresa.com", role:"user", section:"reportes" },
-    { id:3, name:"Usuario Productos", email:"prod@empresa.com", role:"user", section:"productos" },
-    { id:4, name:"Usuario Clientes", email:"clientes@empresa.com", role:"user", section:"clientes" },
-    { id:5, name:"Usuario General", email:"user@empresa.com", role:"user", section:"dashboard-home" }
-];
+// -------------------- TOGGLE PASSWORD --------------------
+const toggle = document.getElementById("togglePassLogin");
+const passInput = document.getElementById("password");
 
+toggle.addEventListener("click", () => {
+    if(passInput.type === "password") {
+        passInput.type = "text";
+        toggle.classList.remove("fa-eye");
+        toggle.classList.add("fa-eye-slash");
+    } else {
+        passInput.type = "password";
+        toggle.classList.remove("fa-eye-slash");
+        toggle.classList.add("fa-eye");
+    }
+});
+
+// -------------------- LOGIN REAL --------------------
 let usuarioActual = null;
 
-// -------------------- LOGIN --------------------
-document.getElementById("loginForm").addEventListener("submit", (e)=>{
+document.getElementById("loginForm").addEventListener("submit", async e => {
     e.preventDefault();
     const email = document.getElementById("email").value;
     const password = document.getElementById("password").value;
 
-    // Usuario maestro simple
-    const user = usuarios.find(u=>u.email===email);
-    if(!user){ alert("Usuario no encontrado"); return; }
-    usuarioActual = user;
-
-    document.getElementById("userNameDisplay").textContent = `Bienvenido, ${usuarioActual.name}`;
-    mostrarDashboard();
-    mostrarSeccion(usuarioActual.section);
-});
-
-// -------------------- DASHBOARD --------------------
-const dashboard = document.getElementById("dashboard");
-const loginSection = document.getElementById("loginSection");
-
-function mostrarLogin(){ loginSection.style.display="flex"; dashboard.style.display="none"; }
-function mostrarDashboard(){ loginSection.style.display="none"; dashboard.style.display="flex"; }
-
-window.logout = function(){ usuarioActual=null; mostrarLogin(); }
-
-// -------------------- SECCIONES --------------------
-function mostrarSeccion(id){
-    if(!usuarioActual){ alert("No has iniciado sesión"); return; }
-    if(usuarioActual.role!=="admin" && id!==usuarioActual.section){ alert("Acceso denegado"); return; }
-
-    document.querySelectorAll(".content-section").forEach(sec=>sec.style.display="none");
-    const activa = document.getElementById(id);
-    if(activa) activa.style.display="block";
-    document.getElementById("tituloSeccion").textContent = activa.querySelector("h2")?.textContent || "Dashboard";
-
-    if(id==="dashboard-home") renderDashboardHome();
-    if(id==="productos") renderProductos();
-    if(id==="clientes") renderClientes();
-}
-
-// -------------------- TOGGLE PASSWORD --------------------
-function setupPasswordToggle(toggleId, inputId){
-    const toggle = document.getElementById(toggleId);
-    const input = document.getElementById(inputId);
-    if(toggle && input){
-        toggle.addEventListener("click", ()=>{
-            input.type = input.type==="password"?"text":"password";
-            toggle.classList.toggle("fa-eye-slash");
+    try {
+        const res = await fetch('http://localhost:3000/api/login', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({email, password})
         });
+        if(!res.ok) throw new Error("Usuario o contraseña incorrectos");
+
+        usuarioActual = await res.json();
+        alert(`Bienvenido, ${usuarioActual.name}`);
+        // window.location.href = 'dashboard.html';
+    } catch(err) {
+        alert(err.message);
     }
-}
-setupPasswordToggle("togglePassLogin","password");
-setupPasswordToggle("togglePassModal","passwordUsuario");
-
-// -------------------- USUARIOS --------------------
-const tablaUsuarios = document.querySelector("#tablaUsuarios tbody");
-let editando = null;
-
-function renderUsuarios(){
-    tablaUsuarios.innerHTML="";
-    usuarios.forEach(u=>{
-        const tr=document.createElement("tr");
-        tr.innerHTML=`<td>${u.id}</td><td>${u.name}</td><td>${u.email}</td>
-        <td><button class="edit-btn" onclick="editarUsuario(${u.id})">Editar</button>
-        <button class="delete-btn" onclick="eliminarUsuario(${u.id})">Eliminar</button></td>`;
-        tablaUsuarios.appendChild(tr);
-    });
-}
-
-window.openFormUsuario = function(){
-    editando=null;
-    document.getElementById("tituloFormUsuario").textContent="Nuevo Usuario";
-    document.getElementById("formUsuario").reset();
-    document.getElementById("modalUsuario").style.display="flex";
-};
-window.closeFormUsuario = function(){ document.getElementById("modalUsuario").style.display="none"; }
-
-window.guardarUsuario = function(){
-    const nombre = document.getElementById("nombreUsuario").value;
-    const email = document.getElementById("emailUsuario").value;
-    const password = document.getElementById("passwordUsuario").value;
-    if(!nombre||!email) return alert("Faltan datos");
-
-    if(!editando){
-        const id = usuarios.length+1;
-        usuarios.push({id,name:nombre,email,role:"user",section:"dashboard-home"});
-    }else{
-        const u = usuarios.find(x=>x.id===editando);
-        if(u){ u.name=nombre; u.email=email; }
-    }
-    renderUsuarios(); closeFormUsuario();
-}
-
-window.editarUsuario = function(id){
-    const u = usuarios.find(x=>x.id===id); if(!u)return;
-    editando=id;
-    document.getElementById("tituloFormUsuario").textContent="Editar Usuario";
-    document.getElementById("nombreUsuario").value=u.name;
-    document.getElementById("emailUsuario").value=u.email;
-    document.getElementById("passwordUsuario").value="";
-    document.getElementById("modalUsuario").style.display="flex";
-}
-
-window.eliminarUsuario = function(id){
-    if(!confirm("¿Eliminar este usuario?")) return;
-    usuarios = usuarios.filter(u=>u.id!==id);
-    renderUsuarios();
-}
-
-// -------------------- PRODUCTOS --------------------
-let productos = [
-    { id:1, name:"Laptop", stock:20, price:1200 },
-    { id:2, name:"Mouse", stock:150, price:25 },
-    { id:3, name:"Teclado", stock:80, price:50 },
-    { id:4, name:"Monitor", stock:35, price:300 },
-    { id:5, name:"Impresora", stock:10, price:200 }
-];
-
-function renderProductos(){
-    const tabla = document.querySelector("#productos table") || crearTabla("productos", ["ID","Nombre","Stock","Precio"]);
-    const tbody = tabla.querySelector("tbody"); tbody.innerHTML="";
-    productos.forEach(p=>{
-        const tr=document.createElement("tr");
-        tr.innerHTML=`<td>${p.id}</td><td>${p.name}</td><td>${p.stock}</td><td>$${p.price}</td>`;
-        tbody.appendChild(tr);
-    });
-}
-
-// -------------------- CLIENTES --------------------
-let clientes = [
-    { id:1, name:"Empresa A", email:"contacto@empresaA.com", phone:"555-1234" },
-    { id:2, name:"Empresa B", email:"contacto@empresaB.com", phone:"555-5678" },
-    { id:3, name:"Empresa C", email:"contacto@empresaC.com", phone:"555-8765" },
-    { id:4, name:"Empresa D", email:"contacto@empresaD.com", phone:"555-4321" },
-    { id:5, name:"Empresa E", email:"contacto@empresaE.com", phone:"555-0000" }
-];
-
-function renderClientes(){
-    const tabla = document.querySelector("#clientes table") || crearTabla("clientes", ["ID","Nombre","Email","Teléfono"]);
-    const tbody = tabla.querySelector("tbody"); tbody.innerHTML="";
-    clientes.forEach(c=>{
-        const tr=document.createElement("tr");
-        tr.innerHTML=`<td>${c.id}</td><td>${c.name}</td><td>${c.email}</td><td>${c.phone}</td>`;
-        tbody.appendChild(tr);
-    });
-}
-
-// -------------------- TABLAS DINÁMICAS --------------------
-function crearTabla(idSeccion, headers){
-    const section=document.getElementById(idSeccion);
-    const table=document.createElement("table");
-    table.className="data-table";
-    const thead=document.createElement("thead");
-    thead.innerHTML="<tr>"+headers.map(h=>`<th>${h}</th>`).join("")+"</tr>";
-    const tbody=document.createElement("tbody");
-    table.appendChild(thead); table.appendChild(tbody);
-    section.appendChild(table); return table;
-}
-
-// -------------------- DASHBOARD HOME --------------------
-function renderDashboardHome(){
-    const section=document.getElementById("dashboard-home");
-    section.innerHTML=`<h2>Resumen General</h2>
-    <div style="display:flex; gap:20px; flex-wrap:wrap; margin-bottom:20px;">
-        <div style="background:#007BFF;color:#fff;padding:20px;border-radius:10px;flex:1; min-width:150px;"><h3>Usuarios</h3><p>${usuarios.length}</p></div>
-        <div style="background:#28a745;color:#fff;padding:20px;border-radius:10px;flex:1; min-width:150px;"><h3>Productos</h3><p>${productos.length}</p></div>
-        <div style="background:#ffc107;color:#000;padding:20px;border-radius:10px;flex:1; min-width:150px;"><h3>Clientes</h3><p>${clientes.length}</p></div>
-        <div style="background:#17a2b8;color:#fff;padding:20px;border-radius:10px;flex:1; min-width:150px;"><h3>Reportes</h3><p>5</p></div>
-    </div>
-    <canvas id="chartVentas" style="margin-top:30px;"></canvas>`;
-
-    const ctx=document.getElementById('chartVentas').getContext('2d');
-    new Chart(ctx,{type:'line', data:{labels:["Enero","Febrero","Marzo","Abril","Mayo","Junio"], datasets:[{label:"Ventas", data:[1200,1500,1000,1700,1400,1900], borderColor:"#007BFF", backgroundColor:"rgba(0,123,255,0.2)", fill:true}]}, options:{responsive:true}});
-}
-
-// -------------------- INICIAL --------------------
-renderUsuarios();
+});
 </script>
 
 </body>

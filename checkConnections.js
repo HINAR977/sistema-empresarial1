@@ -2,25 +2,23 @@
 
 const mysql = require('mysql2/promise');
 const { MongoClient } = require('mongodb');
-const http = require('http');
+const axios = require('axios');
 
-// MySQL
+// 1️⃣ Configuración MySQL
 const MYSQL_CONFIG = {
     host: 'localhost',
-    user: 'root',
-    password: 'admin',
-    database: 'SISTEMA_EMPRESARIAL'
+    user: 'root',             // Cambia por tu usuario MySQL
+    password: 'admin', // Cambia por tu contraseña MySQL
+    database: 'SISTEMA_EMPRESARIAL' // Cambia por tu base de datos MySQL
 };
 
-// MongoDB
+// 2️⃣ Configuración MongoDB
 const MONGO_URI = "mongodb://localhost:27017";
 
-// API
-const API_HOST = 'localhost';
-const API_PORT = 3000;
-const API_PATH = '/';
+// 3️⃣ Configuración API
+const API_URL = 'http://localhost:3000/'; // usar 127.0.0.1 evita problemas de localhost en Windows
 
-// Función principal
+// 4️⃣ Función principal autoejecutable (IIFE)
 (async () => {
 
     // ===== MySQL =====
@@ -43,25 +41,16 @@ const API_PATH = '/';
     }
 
     // ===== API =====
-    const options = {
-        hostname: API_HOST,
-        port: API_PORT,
-        path: API_PATH,
-        method: 'GET'
-    };
-
-    const req = http.request(options, res => {
-        let data = '';
-        res.on('data', chunk => { data += chunk; });
-        res.on('end', () => {
-            console.log(`✅ API respondió correctamente: ${res.statusCode} -> ${data}`);
+    try {
+        const response = await axios({
+            method: 'get',
+            url: API_URL,
+            validateStatus: () => true, // evita errores por código HTTP
+            responseType: 'text'        // permite texto plano
         });
-    });
-
-    req.on('error', err => {
+        console.log(`✅ API respondió correctamente: ${response.status} -> ${response.data}`);
+    } catch (err) {
         console.error('❌ Error al conectar con la API:', err.message);
-    });
-
-    req.end();
+    }
 
 })();
