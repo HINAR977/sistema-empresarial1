@@ -1,0 +1,61 @@
+openapi: 3.0.0
+info:
+  title: Sistema Empresarial API
+  version: 1.0.0
+  description: API para gestión de usuarios
+
+servers:
+  - url: http://localhost:3000
+
+paths:
+  /api/usuarios:
+    get:
+      summary: Obtener todos los usuarios
+      responses:
+        '200':
+          description: Lista de usuarios
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+
+    post:
+      summary: Crear un usuario
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                usuario:
+                  type: string
+                contrasena:
+                  type: string
+                area:
+                  type: string
+                privilegio:
+                  type: string
+              required:
+                - usuario
+                - contrasena
+                - area
+                - privilegio
+      responses:
+        '201':
+          description: Usuario creado
+
+  /api/usuarios/{id}:
+    delete:
+      summary: Eliminar usuario
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Usuario eliminado
