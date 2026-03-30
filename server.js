@@ -1,5 +1,7 @@
 const express = require('express');
 const cors = require('cors');
+const fs = require('fs');
+const path = require('path');
 
 const app = express();
 
@@ -7,6 +9,7 @@ const app = express();
    CONFIGURACIÓN
 ========================= */
 const MODO_APIDOG = true; // true = Apidog, false = Producción real
+const DB_PATH = path.join(__dirname, 'db.json');
 
 /* =========================
    MIDDLEWARE
@@ -17,28 +20,37 @@ app.use(express.json());
 /* =========================
    BASE DE DATOS EN MEMORIA
 ========================= */
-let usuarios = [];
+let db = { usuarios: [], productos: [] };
+
+// Funciones de persistencia
+function cargarDB() {
+  if (fs.existsSync(DB_PATH)) {
+    const data = fs.readFileSync(DB_PATH, 'utf8');
+    db = JSON.parse(data);
+  }
+}
+
+function guardarDB() {
+  fs.writeFileSync(DB_PATH, JSON.stringify(db, null, 2), 'utf8');
+}
+
+// Cargar datos al iniciar
+cargarDB();
 
 /* =========================
    ENDPOINTS USUARIOS
 ========================= */
 
-/**
- * GET /api/usuarios
- * Devuelve todos los usuarios
- */
+// GET /api/usuarios
 app.get('/api/usuarios', (req, res) => {
-  res.json(usuarios);
+  res.json(db.usuarios);
 });
 
-/**
- * POST /api/usuarios
- */
+// POST /api/usuarios
 app.post('/api/usuarios', (req, res) => {
   const { usuario, contrasena, area, privilegio } = req.body;
 
   if (!MODO_APIDOG) {
-    // Validación producción
     if (!usuario || !contrasena || !area || !privilegio) {
       return res.status(400).json({ error: "Todos los campos son obligatorios" });
     }
@@ -52,43 +64,104 @@ app.post('/api/usuarios', (req, res) => {
     privilegio: privilegio || null
   };
 
-  usuarios.push(nuevo);
+  db.usuarios.push(nuevo);
+  guardarDB();
 
-  // Respuesta
   if (MODO_APIDOG) {
-    return res.status(201).send(); // 201 sin cuerpo
+    return res.status(201).send();
   } else {
     return res.status(201).json({ mensaje: "Usuario creado correctamente", usuario: nuevo });
   }
 });
 
-/**
- * DELETE /api/usuarios/:id
- * Elimina un usuario individual
- */
+// DELETE /api/usuarios/:id
 app.delete('/api/usuarios/:id', (req, res) => {
   const id = parseInt(req.params.id);
-  const existe = usuarios.find(u => u.id === id);
+  const existe = db.usuarios.find(u => u.id === id);
 
-  if (!existe) {
-    return res.status(404).json({ error: "Usuario no encontrado" });
-  }
+  if (!existe) return res.status(404).json({ error: "Usuario no encontrado" });
 
-  usuarios = usuarios.filter(u => u.id !== id);
+  db.usuarios = db.usuarios.filter(u => u.id !== id);
+  guardarDB();
   res.json({ mensaje: "Usuario eliminado correctamente" });
 });
 
-/**
- * DELETE /api/usuarios
- * Elimina todos los usuarios (modo Apidog)
- */
+// DELETE /api/usuarios - todos los usuarios (modo Apidog)
 app.delete('/api/usuarios', (req, res) => {
   if (MODO_APIDOG) {
-    usuarios = [];
-    return res.status(200).send(); // 200 sin cuerpo para Apidog
+    db.usuarios = [];
+    guardarDB();
+    return res.status(200).send();
   } else {
     return res.status(404).json({ error: "ID obligatorio para eliminar usuario" });
   }
+});
+
+/* =========================
+   ENDPOINTS CONTROL DE MERCANCÍAS
+========================= */
+
+// POST /api/entrada-mercancias
+app.post('/api/entrada-mercancias', (req, res) => {
+  const { codigo_producto, nombre, cantidad, proveedor, fecha_entrada } = req.body;
+
+  if (!MODO_APIDOG) {
+    if (!codigo_producto || !nombre || !cantidad || !proveedor || !fecha_entrada) {
+      return res.status(400).json({ error: "Todos los campos son obligatorios" });
+    }
+  }
+
+  let producto = db.productos.find(p => p.codigo_producto === codigo_producto);
+
+  if (!producto) {
+    producto = {
+      codigo_producto,
+      nombre,
+      proveedor,
+      stock: cantidad || 0,
+      entradas: [{ cantidad: cantidad || 0, fecha: fecha_entrada }]
+    };
+    db.productos.push(producto);
+  } else {
+    producto.stock += cantidad || 0;
+    producto.entradas.push({ cantidad: cantidad || 0, fecha: fecha_entrada });
+  }
+
+  guardarDB();
+  return res.status(201).send();
+});
+
+// PUT /api/actualizar-stock/:codigo_producto
+app.put('/api/actualizar-stock/:codigo_producto', (req, res) => {
+  const codigo = req.params.codigo_producto;
+  const { cantidad } = req.body;
+
+  const producto = db.productos.find(p => p.codigo_producto === codigo);
+  if (!producto) return res.status(404).json({ error: "Producto no encontrado" });
+
+  producto.stock += cantidad;
+  if (producto.stock < 0) producto.stock = 0;
+
+  guardarDB();
+  return res.status(200).json({ stock_actual: producto.stock });
+});
+
+// GET /api/reportes-stock
+app.get('/api/reportes-stock', (req, res) => {
+  const { producto: codigo } = req.query;
+
+  let resultados = db.productos;
+  if (codigo) resultados = resultados.filter(p => p.codigo_producto === codigo);
+
+  const reportes = resultados.map(p => ({
+    codigo_producto: p.codigo_producto,
+    nombre: p.nombre,
+    proveedor: p.proveedor,
+    stock: p.stock,
+    entradas: p.entradas
+  }));
+
+  return res.status(200).json(reportes);
 });
 
 /* =========================
