@@ -1,6 +1,10 @@
 const express = require('express');
 const router = express.Router();
-const UserMongo = require('../models/UserMongo'); // Modelo de MongoDB
+
+// Ruta de prueba
+router.get('/', (req, res) => res.send('Rutas MongoDB funcionando ✅'));
+
+module.exports = router; // Modelo de MongoDB
 
 // =====================
 // CRUD completo

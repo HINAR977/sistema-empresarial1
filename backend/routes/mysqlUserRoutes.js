@@ -1,17 +1,18 @@
 const express = require('express');
 const router = express.Router();
-const { UserMySQL } = require('../models/UserMySQL'); // Ajusta según tu exportación real
+const UserMySQL = require('../models/UserMySQL'); // Ajusta según tu exportación real
 
 // GET: obtener todos los usuarios de MySQL
 router.get('/', async (req, res) => {
   try {
-    const users = await UserMySQL.findAll(); // Sequelize: trae todos los registros
+    const users = await UserMySQL.findAll();
     res.json(users);
   } catch (err) {
-    console.error('Error al obtener usuarios MySQL:', err);
-    res.status(500).json({ message: 'Error al obtener usuarios MySQL', error: err });
+    res.status(500).json({ error: err.message });
   }
 });
+
+module.exports = router;
 
 // POST: crear un usuario nuevo en MySQL
 router.post('/', async (req, res) => {

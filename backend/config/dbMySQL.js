@@ -1,4 +1,6 @@
+// backend/config/dbMySQL.js
 const { Sequelize } = require('sequelize');
+require('dotenv').config({ path: '../.env' });
 
 const sequelize = new Sequelize(
   process.env.MYSQL_DB,
@@ -7,18 +9,17 @@ const sequelize = new Sequelize(
   {
     host: process.env.MYSQL_HOST,
     dialect: 'mysql',
-    logging: false,
+    logging: false // opcional para no mostrar queries
   }
 );
 
-const connectMySQL = async () => {
+const testConnection = async () => {
   try {
     await sequelize.authenticate();
-    console.log('✅ MySQL conectado correctamente');
+    return { success: true };
   } catch (err) {
-    console.error('❌ Error al conectar MySQL:', err);
-    process.exit(1);
+    return { success: false, error: err.message };
   }
 };
 
-module.exports = { sequelize, connectMySQL };
+module.exports = { sequelize, testConnection };

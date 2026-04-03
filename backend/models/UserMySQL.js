@@ -1,23 +1,29 @@
+// backend/models/UserMySQL.js
 const { DataTypes } = require('sequelize');
-const { sequelize } = require('../config/dbMySQL'); // conexión MySQL
+const { sequelize } = require('../config/dbMySQL');
 
-// Definición del modelo
 const UserMySQL = sequelize.define('UserMySQL', {
-  username: {
+  id: {
+    type: DataTypes.INTEGER,
+    primaryKey: true,
+    autoIncrement: true
+  },
+  nombre: {
     type: DataTypes.STRING,
     allowNull: false
+  },
+  email: {
+    type: DataTypes.STRING,
+    allowNull: false,
+    unique: true
   },
   password: {
     type: DataTypes.STRING,
     allowNull: false
-  },
-  role: {
-    type: DataTypes.STRING,
-    allowNull: false
   }
 }, {
-  tableName: 'users', // nombre de la tabla en la base de datos
+  tableName: 'users_mysql',
   timestamps: true
 });
 
-module.exports = { UserMySQL };
+module.exports = UserMySQL;
