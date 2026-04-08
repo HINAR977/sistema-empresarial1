@@ -4,51 +4,25 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Bodega</title>
-<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="css/styles.css">
 </head>
+
 <body>
 
 <header class="topbar">
+<<<<<<< HEAD
     <img src="assets/logo.png" class="topbar-logo" alt="Logo de la bodega">
     <span>Inventario de Bodega</span>
+=======
+    <h1>Área de Bodega</h1>
+    <button onclick="window.location.href='index.html'" class="btn-primary">Regresar</button>
+>>>>>>> a1f9ec0199b61879a1714df2b65fa3864bb7de4c
 </header>
 
-<aside class="sidebar">
-    <h3>Bodega</h3>
-    <a href="dashboard.html">Inicio</a>
-    <a href="bodega.html">Inventario</a>
-    <a href="index.html">Salir</a>
-</aside>
+<div class="container">
+    <h2>Panel de Bodega</h2>
+    <p>Contenido específico de bodega aquí...</p>
+</div>
 
-<main class="content">
-    <h1>Inventario</h1>
-    <button class="btn-primary" onclick="openForm()">Agregar Producto</button>
-
-    <table id="tablaInventario">
-        <thead>
-            <tr>
-                <th>Código</th>
-                <th>Nombre</th>
-                <th>Cantidad</th>
-                <th>Estado</th>
-                <th>Acciones</th>
-            </tr>
-        </thead>
-        <tbody></tbody>
-    </table>
-
-    <div id="modal" class="modal">
-        <div class="modal-content">
-            <h2 id="tituloForm">Nuevo Producto</h2>
-            <input type="text" id="codigo" placeholder="Código">
-            <input type="text" id="nombre" placeholder="Nombre">
-            <input type="number" id="cantidad" placeholder="Cantidad">
-            <button onclick="guardar()">Guardar</button>
-            <button class="btn-cancelar" onclick="closeForm()">Cancelar</button>
-        </div>
-    </div>
-</main>
-
-<script src="crud_bodega.js"></script>
 </body>
 </html>

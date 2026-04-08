@@ -4,50 +4,20 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Ventas</title>
-<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="css/styles.css">
 </head>
+
 <body>
 
 <header class="topbar">
-    <img src="assets/logo.png" class="topbar-logo">
-    <span>Módulo de Ventas</span>
+    <h1>Área de Ventas</h1>
+    <button onclick="window.location.href='index.html'" class="btn-primary">Regresar</button>
 </header>
 
-<aside class="sidebar">
-    <h3>Ventas</h3>
-    <a href="dashboard.html">Inicio</a>
-    <a href="index.html">Salir</a>
-</aside>
+<div class="container">
+    <h2>Panel de Ventas</h2>
+    <p>Contenido del área de ventas...</p>
+</div>
 
-<main class="content">
-    <h1>Registro de Ventas</h1>
-    <button class="btn-primary" onclick="openFormVenta()">Agregar Venta</button>
-
-    <table id="tablaVentas">
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>Producto</th>
-                <th>Cantidad</th>
-                <th>Cliente</th>
-                <th>Acciones</th>
-            </tr>
-        </thead>
-        <tbody></tbody>
-    </table>
-
-    <div id="modalVenta" class="modal">
-        <div class="modal-content">
-            <h2 id="tituloFormVenta">Nueva Venta</h2>
-            <input type="text" id="producto" placeholder="Producto">
-            <input type="number" id="cantidadVenta" placeholder="Cantidad">
-            <input type="text" id="cliente" placeholder="Cliente">
-            <button onclick="guardarVenta()">Guardar</button>
-            <button class="btn-cancelar" onclick="closeFormVenta()">Cancelar</button>
-        </div>
-    </div>
-</main>
-
-<script src="crud_ventas.js"></script>
 </body>
 </html>

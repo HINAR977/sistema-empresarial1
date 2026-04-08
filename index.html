@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<<<<<<< HEAD
 <title>Sistema Empresarial - Dashboard</title>
 
 <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
@@ -23,12 +24,27 @@ body {
 
 /* LOGIN */
 .login-body {
+=======
+<title>Enterprise System | Login Premium</title>
+
+<!-- FontAwesome -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+<style>
+body {
+    margin: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    height: 100vh;
+>>>>>>> a1f9ec0199b61879a1714df2b65fa3864bb7de4c
     display: flex;
     justify-content: center;
     align-items: center;
-    min-height: 100vh;
+    background: linear-gradient(-45deg, #0D47A1, #1976D2, #42A5F5, #0D47A1);
+    background-size: 400% 400%;
+    animation: gradientBG 15s ease infinite;
 }
 
+<<<<<<< HEAD
 .login-container {
     background: #fff;
     padding: 40px;
@@ -232,10 +248,168 @@ table td {
                 <button type="button" class="btn-cancelar" onclick="closeFormUsuario()">Cancelar</button>
             </div>
         </form>
+=======
+@keyframes gradientBG {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+/* Contenedor principal */
+.auth-container {
+    background: rgba(255, 255, 255, 0.98);
+    padding: 36px 28px;
+    border-radius: 18px;
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.12);
+    width: 360px;
+    max-width: 90%;
+    text-align: center;
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.auth-container:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 16px 36px rgba(0, 0, 0, 0.16);
+}
+
+.auth-container h2, .auth-title {
+    color: #007BFF;
+    margin-bottom: 24px;
+    font-weight: 600;
+}
+
+.auth-title {
+    font-size: 2.2em;
+    color: #0D47A1;
+    margin-bottom: 35px;
+    font-weight: 700;
+    letter-spacing: 1px;
+}
+
+.auth-logo {
+    width: 100px;
+    margin-bottom: 25px;
+    transition: transform 0.3s;
+}
+.auth-logo:hover {
+    transform: rotate(5deg);
+}
+
+/* Input fields */
+.input-group {
+    position: relative;
+    margin-bottom: 25px;
+    transition: all 0.3s ease;
+}
+
+.input-group input {
+    width: 100%;
+    padding: 14px 45px 14px 45px;
+    border: 2px solid #ccc;
+    border-radius: 12px;
+    font-size: 1em;
+    background: #f7f7f7;
+    box-sizing: border-box;
+    transition: all 0.3s ease;
+}
+
+.input-group input:focus {
+    border-color: #0D47A1;
+    background:#fff;
+    outline:none;
+    box-shadow: 0 0 8px rgba(13,71,161,0.5);
+}
+
+.input-group i.lock-icon {
+    position: absolute;
+    top: 50%;
+    left: 14px;
+    transform: translateY(-50%);
+    color: #1976D2;
+    transition: transform 0.3s;
+}
+
+.input-group i.eye-toggle {
+    position: absolute;
+    top: 50%;
+    right: 14px;
+    transform: translateY(-50%);
+    cursor: pointer;
+    color: #1976D2;
+    transition: color 0.3s, transform 0.3s;
+}
+
+.input-group input:focus ~ .lock-icon { transform: scale(1.05); }
+.input-group input:focus ~ .eye-toggle { transform: scale(1.05); }
+
+/* Botones */
+.btn-submit {
+    width: 100%;
+    padding: 14px;
+    font-size: 1em;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    color: #fff;
+    font-weight: 700;
+    background: linear-gradient(135deg, #0D47A1, #42A5F5);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.25);
+    transition: all 0.3s ease;
+}
+.btn-submit:hover {
+    background: linear-gradient(135deg,#1976D2,#90CAF9);
+    transform: translateY(-2px);
+    box-shadow: 0 12px 25px rgba(0,0,0,0.35);
+}
+
+/* Footer */
+.auth-footer {
+    margin-top: 25px;
+    font-size: 0.9em;
+    color: #555;
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    transition: all 0.3s;
+}
+.auth-footer a {
+    color: #1976D2;
+    text-decoration: none;
+    transition: color 0.3s;
+}
+.auth-footer a:hover {
+    color: #0D47A1;
+    text-decoration: underline;
+}
+</style>
+</head>
+<body>
+
+<div class="auth-container">
+    <img src="assets/logo.png" alt="Logo" class="auth-logo">
+    <h1 class="auth-title">Acceso al Sistema</h1>
+    <form id="loginForm">
+        <div class="input-group">
+            <input type="email" id="email" placeholder="Correo electrónico" required maxlength="50">
+            <i class="fas fa-envelope lock-icon"></i>
+        </div>
+        <div class="input-group">
+            <input type="password" id="password" placeholder="Contraseña" required maxlength="30">
+            <i class="fas fa-lock lock-icon"></i>
+            <i class="fas fa-eye eye-toggle" id="togglePassLogin" role="button" aria-label="Mostrar contraseña"></i>
+        </div>
+        <button type="submit" class="btn-submit">Ingresar</button>
+    </form>
+    <div class="auth-footer">
+        <a href="#">Crear cuenta</a> | <a href="#">Olvidé mi contraseña</a>
+>>>>>>> a1f9ec0199b61879a1714df2b65fa3864bb7de4c
     </div>
 </div>
 
 <script>
+<<<<<<< HEAD
 
 /* LOGIN */
 document.getElementById('loginForm').addEventListener('submit', function(e){
@@ -335,6 +509,47 @@ function logout(){
     document.getElementById("loginContainer").style.display = "flex";
 }
 
+=======
+// -------------------- TOGGLE PASSWORD --------------------
+const toggle = document.getElementById("togglePassLogin");
+const passInput = document.getElementById("password");
+
+toggle.addEventListener("click", () => {
+    if(passInput.type === "password") {
+        passInput.type = "text";
+        toggle.classList.remove("fa-eye");
+        toggle.classList.add("fa-eye-slash");
+    } else {
+        passInput.type = "password";
+        toggle.classList.remove("fa-eye-slash");
+        toggle.classList.add("fa-eye");
+    }
+});
+
+// -------------------- LOGIN REAL --------------------
+let usuarioActual = null;
+
+document.getElementById("loginForm").addEventListener("submit", async e => {
+    e.preventDefault();
+    const email = document.getElementById("email").value;
+    const password = document.getElementById("password").value;
+
+    try {
+        const res = await fetch('http://localhost:3000/api/login', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({email, password})
+        });
+        if(!res.ok) throw new Error("Usuario o contraseña incorrectos");
+
+        usuarioActual = await res.json();
+        alert(`Bienvenido, ${usuarioActual.name}`);
+        // window.location.href = 'dashboard.html';
+    } catch(err) {
+        alert(err.message);
+    }
+});
+>>>>>>> a1f9ec0199b61879a1714df2b65fa3864bb7de4c
 </script>
 
 </body>

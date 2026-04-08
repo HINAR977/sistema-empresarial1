@@ -1,0 +1,4 @@
+{
+  "tests/test_login_automatico.py::test_login_correcto": true,
+  "tests/test_login.py::test_login_correcto": true
+}

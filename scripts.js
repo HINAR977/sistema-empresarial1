@@ -1,15 +1,49 @@
 function login() {
     const user = document.getElementById("user").value;
     const pass = document.getElementById("pass").value;
-    let destino = "";
 
-    if (user === "bodegaUser" && pass === "bodega123") destino = "bodega.html";
-    if (user === "adminUser" && pass === "admin123") destino = "administracion.html";
-    if (user === "contaUser" && pass === "conta123") destino = "contabilidad.html";
-    if (user === "ventasUser" && pass === "ventas123") destino = "ventas.html";
+    // Llamada a la API para obtener todos los usuarios
+    fetch('http://localhost:3000/api/users')
+        .then(res => {
+            if (!res.ok) throw new Error('Error al conectar con el servidor');
+            return res.json();
+        })
+        .then(data => {
+            // Buscar usuario y contraseña correctos en la respuesta
+            const usuario = data.find(u => u.username === user && u.password === pass);
 
-    if (!destino) { alert("Usuario o contraseña incorrectos"); return; }
+            if (!usuario) {
+                alert("Usuario o contraseña incorrectos");
+                return;
+            }
 
-    localStorage.setItem('usuarioActual', user); // <- IMPORTANTE
-    window.location.href = destino;
+            // Determinar la página de destino según el rol
+            let destino = "";
+            switch (usuario.role) {
+                case "bodega":
+                    destino = "bodega.html";
+                    break;
+                case "admin":
+                    destino = "administracion.html";
+                    break;
+                case "contabilidad":
+                    destino = "contabilidad.html";
+                    break;
+                case "ventas":
+                    destino = "ventas.html";
+                    break;
+                default:
+                    alert("Rol de usuario no válido");
+                    return;
+            }
+
+            // Guardar el usuario en localStorage y redirigir
+            localStorage.setItem('usuarioActual', user);
+            window.location.href = destino;
+        })
+        .catch(err => {
+            console.error(err);
+            alert("Ocurrió un error al intentar iniciar sesión");
+        });
 }
+ 
