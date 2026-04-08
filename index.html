@@ -5,10 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Sistema Empresarial - Dashboard</title>
 
-<script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
-
 <style>
-/* RESET */
 * {
     margin: 0;
     padding: 0;
@@ -59,6 +56,9 @@ body {
 #dashboard {
     display: none;
     min-height: 100vh;
+}
+
+.dashboard-flex {
     display: flex;
 }
 
@@ -192,29 +192,31 @@ table td {
 
 <!-- DASHBOARD -->
 <div id="dashboard">
-    <div class="sidebar">
-        <h2>Empresa</h2>
-        <a href="#" onclick="mostrarSeccion('usuarios')">Usuarios</a>
-        <a href="#" onclick="logout()">Cerrar Sesión</a>
-    </div>
+    <div class="dashboard-flex">
+        <div class="sidebar">
+            <h2>Empresa</h2>
+            <a href="#" onclick="mostrarSeccion('usuarios')">Usuarios</a>
+            <a href="#" onclick="logout()">Cerrar Sesión</a>
+        </div>
 
-    <div class="content-area">
-        <h1 id="tituloSeccion">Usuarios</h1>
+        <div class="content-area">
+            <h1 id="tituloSeccion">Usuarios</h1>
 
-        <button class="btn-primary" onclick="openFormUsuario()">Agregar Usuario</button>
+            <button class="btn-primary" onclick="openFormUsuario()">Agregar Usuario</button>
 
-        <table id="tablaUsuarios">
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Usuario</th>
-                    <th>Contraseña</th>
-                    <th>Área</th>
-                    <th>Acciones</th>
-                </tr>
-            </thead>
-            <tbody></tbody>
-        </table>
+            <table id="tablaUsuarios">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Usuario</th>
+                        <th>Contraseña</th>
+                        <th>Área</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
     </div>
 </div>
 
@@ -237,48 +239,64 @@ table td {
 
 <script>
 
-/* LOGIN */
+/* TOKEN AUTO LOGIN */
+window.addEventListener("load", () => {
+    const token = localStorage.getItem("token");
+
+    if(token){
+        document.getElementById("loginContainer").style.display = "none";
+        document.getElementById("dashboard").style.display = "block";
+        cargarUsuarios();
+    }
+});
+
+/* LOGIN REAL */
 document.getElementById('loginForm').addEventListener('submit', function(e){
     e.preventDefault();
 
     const user = document.getElementById("user").value.trim();
     const pass = document.getElementById("pass").value.trim();
 
-    if(user === "adminUser" && pass === "admin123"){
-        document.getElementById("loginContainer").style.display = "none";
-        document.getElementById("dashboard").style.display = "flex";
-    } else {
-        alert("Usuario o contraseña incorrectos");
-    }
+    fetch("http://localhost:3000/api/auth/login", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({ usuario: user, password: pass })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if(data.token){
+            localStorage.setItem("token", data.token);
+
+            document.getElementById("loginContainer").style.display = "none";
+            document.getElementById("dashboard").style.display = "block";
+
+            cargarUsuarios();
+        } else {
+            alert("Usuario o contraseña incorrectos");
+        }
+    })
+    .catch(() => alert("Error de conexión con el servidor"));
 });
 
-/* MODAL */
-function openFormUsuario(){
-    document.getElementById("modalUsuario").style.display = "flex";
-}
-
-function closeFormUsuario(){
-    document.getElementById("modalUsuario").style.display = "none";
-    document.getElementById("formUsuario").reset();
+/* LOGOUT */
+function logout(){
+    localStorage.removeItem("token");
+    document.getElementById("dashboard").style.display = "none";
+    document.getElementById("loginContainer").style.display = "flex";
 }
 
 /* USUARIOS */
 let usuarios = [];
-let nextId = 1;
+let editandoId = null;
 
-function guardarUsuario(){
-    const usuario = document.getElementById("usuario").value.trim();
-    const contrasena = document.getElementById("contrasena").value.trim();
-    const area = document.getElementById("area").value.trim();
+async function cargarUsuarios(){
+    const token = localStorage.getItem("token");
 
-    if(!usuario || !contrasena || !area){
-        alert("Todos los campos son obligatorios");
-        return;
-    }
-
-    usuarios.push({id: nextId++, usuario, contrasena, area});
+    const res = await fetch("http://localhost:3000/api/users", {
+        headers: {"Authorization": token}
+    });
+    usuarios = await res.json();
     actualizarTabla();
-    closeFormUsuario();
 }
 
 function actualizarTabla(){
@@ -288,53 +306,94 @@ function actualizarTabla(){
     usuarios.forEach(u => {
         const tr = document.createElement("tr");
         tr.innerHTML = `
-            <td>${u.id}</td>
+            <td>${u._id}</td>
             <td>${u.usuario}</td>
-            <td>${u.contrasena}</td>
+            <td>******</td>
             <td>${u.area}</td>
             <td>
-                <button class="edit-btn" onclick="editarUsuario(${u.id})">Editar</button>
-                <button class="delete-btn" onclick="eliminarUsuario(${u.id})">Eliminar</button>
+                <button class="edit-btn" onclick="editarUsuario('${u._id}')">Editar</button>
+                <button class="delete-btn" onclick="eliminarUsuario('${u._id}')">Eliminar</button>
             </td>
         `;
         tbody.appendChild(tr);
     });
 }
 
-function eliminarUsuario(id){
-    usuarios = usuarios.filter(u => u.id !== id);
-    actualizarTabla();
+async function guardarUsuario(){
+    const token = localStorage.getItem("token");
+    const usuario = document.getElementById("usuario").value.trim();
+    const contrasena = document.getElementById("contrasena").value.trim();
+    const area = document.getElementById("area").value.trim();
+
+    if(!usuario || !contrasena || !area){
+        alert("Todos los campos son obligatorios");
+        return;
+    }
+
+    if(editandoId){
+        await fetch(`http://localhost:3000/api/users/${editandoId}`, {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": token
+            },
+            body: JSON.stringify({ usuario, password: contrasena, area })
+        });
+    } else {
+        await fetch("http://localhost:3000/api/users", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": token
+            },
+            body: JSON.stringify({ usuario, password: contrasena, area })
+        });
+    }
+
+    closeFormUsuario();
+    cargarUsuarios();
+}
+
+async function eliminarUsuario(id){
+    if(confirm("¿Seguro que deseas eliminar este usuario?")){
+        const token = localStorage.getItem("token");
+        await fetch(`http://localhost:3000/api/users/${id}`, {
+            method: "DELETE",
+            headers: { "Authorization": token }
+        });
+        cargarUsuarios();
+    }
 }
 
 function editarUsuario(id){
-    const u = usuarios.find(x => x.id === id);
+    const u = usuarios.find(x => x._id === id);
     if(!u) return;
 
-    openFormUsuario();
+    editandoId = id;
+
+    document.getElementById("tituloFormUsuario").textContent = "Editar Usuario";
     document.getElementById("usuario").value = u.usuario;
-    document.getElementById("contrasena").value = u.contrasena;
+    document.getElementById("contrasena").value = "";
     document.getElementById("area").value = u.area;
 
-    document.querySelector(".btn-save").onclick = function(){
-        u.usuario = document.getElementById("usuario").value.trim();
-        u.contrasena = document.getElementById("contrasena").value.trim();
-        u.area = document.getElementById("area").value.trim();
-        actualizarTabla();
-        closeFormUsuario();
-        document.querySelector(".btn-save").onclick = guardarUsuario;
-    }
+    openFormUsuario();
+}
+
+function openFormUsuario(){
+    document.getElementById("modalUsuario").style.display = "flex";
+}
+
+function closeFormUsuario(){
+    editandoId = null;
+    document.getElementById("tituloFormUsuario").textContent = "Nuevo Usuario";
+    document.getElementById("formUsuario").reset();
+    document.getElementById("modalUsuario").style.display = "none";
 }
 
 function mostrarSeccion(seccion){
     document.getElementById("tituloSeccion").textContent =
         seccion.charAt(0).toUpperCase() + seccion.slice(1);
 }
-
-function logout(){
-    document.getElementById("dashboard").style.display = "none";
-    document.getElementById("loginContainer").style.display = "flex";
-}
-
 </script>
 
 </body>
