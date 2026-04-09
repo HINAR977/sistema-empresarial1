@@ -1,0 +1,51 @@
+const express = require('express');
+const cors = require('cors');
+const fs = require('fs');
+const path = require('path');
+const app = express();
+const DB_PATH = path.join(__dirname,'db.json');
+app.use(cors()); app.use(express.json());
+
+let db = {usuarios:[], productos:[]};
+function cargarDB(){ if(fs.existsSync(DB_PATH)){ db=JSON.parse(fs.readFileSync(DB_PATH,'utf8')); } }
+function guardarDB(){ fs.writeFileSync(DB_PATH, JSON.stringify(db,null,2),'utf8'); }
+cargarDB();
+
+// --- ENDPOINTS USUARIOS
+app.get('/api/usuarios',(req,res)=>{ res.json(db.usuarios); });
+app.post('/api/usuarios',(req,res)=>{
+  const {usuario,contrasena,area,privilegio}=req.body;
+  const nuevo={id:Date.now(), usuario, contrasena, area, privilegio};
+  db.usuarios.push(nuevo); guardarDB();
+  res.status(201).json({mensaje:"Usuario creado", usuario:nuevo});
+});
+app.delete('/api/usuarios/:id',(req,res)=>{
+  const id=parseInt(req.params.id);
+  db.usuarios=db.usuarios.filter(u=>u.id!==id);
+  guardarDB(); res.json({mensaje:"Usuario eliminado"});
+});
+
+// --- ENDPOINTS PRODUCTOS
+app.post('/api/entrada-mercancias',(req,res)=>{
+  const {codigo_producto,nombre,cantidad,proveedor,fecha_entrada}=req.body;
+  let producto=db.productos.find(p=>p.codigo_producto===codigo_producto);
+  if(!producto){
+    producto={codigo_producto,nombre,proveedor,stock:cantidad||0,entradas:[{cantidad,cantidad?cantidad:0,fecha:fecha_entrada}]};
+    db.productos.push(producto);
+  }else{
+    producto.stock+=cantidad||0;
+    producto.entradas.push({cantidad,cantidad?cantidad:0,fecha:fecha_entrada});
+  }
+  guardarDB(); res.status(201).send();
+});
+app.put('/api/actualizar-stock/:codigo_producto',(req,res)=>{
+  const codigo=req.params.codigo_producto; const {cantidad}=req.body;
+  const producto=db.productos.find(p=>p.codigo_producto===codigo);
+  if(!producto) return res.status(404).json({error:"Producto no encontrado"});
+  producto.stock+=cantidad; if(producto.stock<0) producto.stock=0;
+  guardarDB(); res.json({stock_actual:producto.stock});
+});
+app.get('/api/reportes-stock',(req,res)=>{ res.json(db.productos); });
+
+app.get('/',(req,res)=>res.send("API funcionando 🚀"));
+app.listen(3000,()=>console.log("Servidor corriendo http://localhost:3000"));
