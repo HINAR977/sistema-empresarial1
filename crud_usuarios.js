@@ -160,4 +160,8 @@ function renderTablaUsuarios() {
 /* =========================
    INIT
 ========================= */
-window.addEventListener("DOMContentLoaded", cargarUsuarios);
+window.addEventListener("DOMContentLoaded", () => {
+  const loginActivo = document.getElementById("loginContainer")?.style.display !== "none";
+  const tieneSesion = Boolean(localStorage.getItem("token"));
+  if (!loginActivo || tieneSesion) cargarUsuarios();
+});

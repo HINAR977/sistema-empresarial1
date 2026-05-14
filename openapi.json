@@ -1,61 +1,214 @@
-openapi: 3.0.0
-info:
-  title: Sistema Empresarial API
-  version: 1.0.0
-  description: API para gestión de usuarios
-
-servers:
-  - url: http://localhost:3000
-
-paths:
-  /api/usuarios:
-    get:
-      summary: Obtener todos los usuarios
-      responses:
-        '200':
-          description: Lista de usuarios
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  type: object
-
-    post:
-      summary: Crear un usuario
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                usuario:
-                  type: string
-                contrasena:
-                  type: string
-                area:
-                  type: string
-                privilegio:
-                  type: string
-              required:
-                - usuario
-                - contrasena
-                - area
-                - privilegio
-      responses:
-        '201':
-          description: Usuario creado
-
-  /api/usuarios/{id}:
-    delete:
-      summary: Eliminar usuario
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: integer
-      responses:
-        '200':
-          description: Usuario eliminado
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Sistema Empresarial API",
+    "version": "1.0.0",
+    "description": "API para autenticacion, administracion de usuarios, inventario y reportes basicos."
+  },
+  "servers": [
+    {
+      "url": "http://localhost:3000"
+    }
+  ],
+  "paths": {
+    "/api/auth/login": {
+      "post": {
+        "summary": "Autenticar usuario",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["usuario", "password"],
+                "properties": {
+                  "usuario": { "type": "string" },
+                  "password": { "type": "string", "format": "password" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Sesion iniciada correctamente" },
+          "400": { "description": "Campos obligatorios faltantes" },
+          "401": { "description": "Credenciales incorrectas" }
+        }
+      }
+    },
+    "/api/usuarios": {
+      "get": {
+        "summary": "Obtener todos los usuarios",
+        "responses": {
+          "200": {
+            "description": "Lista de usuarios sin contrasena",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/UsuarioSeguro" }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Crear usuario",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/UsuarioInput" }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Usuario creado" },
+          "400": { "description": "Campos obligatorios faltantes" }
+        }
+      }
+    },
+    "/api/usuarios/{id}": {
+      "put": {
+        "summary": "Actualizar usuario",
+        "parameters": [{ "$ref": "#/components/parameters/IdPath" }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/UsuarioUpdate" }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Usuario actualizado" },
+          "404": { "description": "Usuario no encontrado" }
+        }
+      },
+      "delete": {
+        "summary": "Eliminar usuario",
+        "parameters": [{ "$ref": "#/components/parameters/IdPath" }],
+        "responses": {
+          "200": { "description": "Usuario eliminado" },
+          "404": { "description": "Usuario no encontrado" }
+        }
+      }
+    },
+    "/api/entrada-mercancias": {
+      "post": {
+        "summary": "Registrar entrada de mercancia",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/EntradaMercancia" }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Mercancia registrada" },
+          "400": { "description": "Campos obligatorios faltantes" }
+        }
+      }
+    },
+    "/api/actualizar-stock/{codigo_producto}": {
+      "put": {
+        "summary": "Actualizar stock de producto",
+        "parameters": [
+          {
+            "name": "codigo_producto",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["cantidad"],
+                "properties": {
+                  "cantidad": { "type": "number" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Stock actualizado" },
+          "404": { "description": "Producto no encontrado" }
+        }
+      }
+    },
+    "/api/reportes-stock": {
+      "get": {
+        "summary": "Consultar reporte de stock",
+        "parameters": [
+          {
+            "name": "producto",
+            "in": "query",
+            "required": false,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": { "description": "Reporte de inventario" }
+        }
+      }
+    }
+  },
+  "components": {
+    "parameters": {
+      "IdPath": {
+        "name": "id",
+        "in": "path",
+        "required": true,
+        "schema": { "type": "integer" }
+      }
+    },
+    "schemas": {
+      "UsuarioSeguro": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer" },
+          "usuario": { "type": "string" },
+          "area": { "type": "string" },
+          "privilegio": { "type": "string" }
+        }
+      },
+      "UsuarioInput": {
+        "type": "object",
+        "required": ["usuario", "contrasena", "area", "privilegio"],
+        "properties": {
+          "usuario": { "type": "string" },
+          "contrasena": { "type": "string", "format": "password" },
+          "area": { "type": "string" },
+          "privilegio": { "type": "string" }
+        }
+      },
+      "UsuarioUpdate": {
+        "type": "object",
+        "properties": {
+          "usuario": { "type": "string" },
+          "contrasena": { "type": "string", "format": "password" },
+          "area": { "type": "string" },
+          "privilegio": { "type": "string" }
+        }
+      },
+      "EntradaMercancia": {
+        "type": "object",
+        "required": ["codigo_producto", "nombre", "cantidad", "proveedor", "fecha_entrada"],
+        "properties": {
+          "codigo_producto": { "type": "string" },
+          "nombre": { "type": "string" },
+          "cantidad": { "type": "number" },
+          "proveedor": { "type": "string" },
+          "fecha_entrada": { "type": "string", "format": "date" }
+        }
+      }
+    }
+  }
+}
